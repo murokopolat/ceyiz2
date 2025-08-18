@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İnteraktif Çeyiz Listesi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f8f7f4; color: #3d3d3d;}
+        .tab-active { background-color: #059669; color: white; }
+        .tab-inactive { background-color: #e5e7eb; color: #374151; }
+        .chart-container { position: relative; width: 100%; max-width: 320px; margin-left: auto; margin-right: auto; height: 320px; max-height: 320px; }
+        .table-row-completed { text-decoration: line-through; color: #9ca3af; }
+        .table-row-completed input[type='checkbox'] { accent-color: #059669; }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #059669;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.6);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+        }
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+        }
+        #purchased-items, #remaining-items {
+            cursor: pointer;
+        }
+        /* YENİ: Fotoğraf stilleri */
+        .product-image-container {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .product-thumbnail {
+            width: 60px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            border: 2px solid #e5e7eb;
+        }
+        .add-photo-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 0.5rem;
+            background-color: #f3f4f6;
+            border: 2px dashed #d1d5db;
+            color: #6b7280;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            transition: all 0.2s;
+        }
+        .add-photo-btn:hover {
+            background-color: #e5e7eb;
+            border-color: #9ca3af;
+        }
+        #imagePreviewModal .modal-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            width: auto;
+            height: auto;
+            padding: 10px;
+        }
+        #full-product-image {
+            max-width: 85vw;
+            max-height: 85vh;
+            border-radius: 0.75rem;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-emerald-700">İnteraktif Çeyiz Listesi</h1>
+            <p class="mt-2 text-lg text-gray-600">Çeyiz hazırlık sürecini kolayca yönet ve ilerlemeni takip et.</p>
+        </header>
+
+        <main>
+            <div id="dashboard" class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4 text-center">Genel Bakış</h2>
+                <p class="text-center text-gray-500 mb-6">Bu bölümde, çeyiz listendeki genel ilerlemeyi ve kategorilere göre dağılımı görebilirsin. Bir ürünü işaretlediğinde tüm istatistikler anında güncellenecektir.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                    
+                    <div class="md:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
+                        <div class="bg-emerald-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold text-gray-500">Toplam Ürün</h3>
+                            <p id="total-items" class="text-3xl font-bold text-emerald-600">0</p>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold text-gray-500">Alınan</h3>
+                            <p id="purchased-items" class="text-2xl font-bold text-green-600">0</p>
+                        </div>
+                        <div class="bg-amber-50 p-4 rounded-lg">
+                            <h3 class="text-lg font-semibold text-amber-600">Kalan</h3>
+                            <p id="remaining-items" class="text-2xl font-bold text-amber-600">0</p>
+                        </div>
+                        <div class="bg-blue-50 p-4 rounded-lg col-span-1 sm:col-span-3">
+                            <h3 class="text-lg font-semibold text-gray-500">Harcanan Toplam Tutar</h3>
+                            <p id="total-spent" class="text-2xl font-bold text-blue-600">0,00 TL</p>
+                        </div>
+                        <div class="bg-purple-50 p-4 rounded-lg col-span-1 sm:col-span-3">
+                            <h3 class="text-lg font-semibold text-gray-500">Kalan Bütçe</h3>
+                            <p id="remaining-budget" class="text-2xl font-bold text-purple-600">0,00 TL</p>
+                            <button id="set-budget-btn" class="mt-2 bg-purple-600 hover:bg-purple-700 text-white font-bold py-1 px-3 rounded-full text-xs transition-colors duration-200">
+                                Bütçe Belirle
+                            </button>
+                        </div>
+                        <div class="sm:col-span-3 mt-4">
+                            <div class="w-full bg-gray-200 rounded-full h-4">
+                                <div id="progress-bar" class="bg-emerald-600 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+                            </div>
+                            <p id="progress-text" class="text-center mt-2 font-medium text-gray-600">Tamamlanma Oranı: 0%</p>
+                        </div>
+                    </div>
+
+                    <div class="md:col-span-1">
+                        <div class="chart-container">
+                            <canvas id="progress-chart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-lg p-6">
+                <nav id="category-tabs" class="flex flex-wrap gap-2 mb-6 justify-center">
+                    <!-- Kategori Sekmeleri Buraya Gelecek -->
+                </nav>
+
+                <div class="flex flex-wrap gap-2 mb-6 justify-center">
+                    <button id="add-category-btn" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all duration-300">
+                        + Yeni Kategori Ekle
+                    </button>
+                    <button id="delete-category-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all duration-300">
+                        Kategoriyi Sil
+                    </button>
+                </div>
+
+                <div class="mb-4">
+                    <input type="text" id="searchInput" placeholder="Ürün ara..." class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-emerald-600">
+                </div>
+
+                <div id="filter-sort-controls" class="p-4 bg-gray-50 rounded-lg mb-6 flex flex-wrap gap-4 items-end">
+                    <div class="flex-grow">
+                        <label for="filter-status" class="block text-sm font-medium text-gray-700">Duruma Göre Filtrele</label>
+                        <select id="filter-status" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
+                            <option value="all">Tümü</option>
+                            <option value="purchased">Alınanlar</option>
+                            <option value="unpurchased">Alınmayanlar</option>
+                        </select>
+                    </div>
+                    <div class="flex-grow">
+                        <label for="filter-min-price" class="block text-sm font-medium text-gray-700">Min Fiyat (TL)</label>
+                        <input type="number" id="filter-min-price" placeholder="Örn: 100" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+                    <div class="flex-grow">
+                        <label for="filter-max-price" class="block text-sm font-medium text-gray-700">Maks Fiyat (TL)</label>
+                        <input type="number" id="filter-max-price" placeholder="Örn: 5000" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
+                    </div>
+
+                    <div class="flex-grow">
+                        <label for="sort-by" class="block text-sm font-medium text-gray-700">Sırala</label>
+                        <select id="sort-by" class="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-emerald-500 focus:border-emerald-500">
+                            <option value="default">Varsayılan (Alt Kategori)</option>
+                            <option value="price-asc">Fiyata Göre (Artan)</option>
+                            <option value="price-desc">Fiyata Göre (Azalan)</option>
+                            <option value="name-asc">İsme Göre (A-Z)</option>
+                            <option value="name-desc">İsme Göre (Z-A)</option>
+                        </select>
+                    </div>
+
+                    <div class="flex gap-2">
+                         <button id="apply-filters-btn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md shadow-sm transition-colors duration-200">
+                            Uygula
+                        </button>
+                        <button id="clear-filters-btn" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-md shadow-sm transition-colors duration-200">
+                            Temizle
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex justify-center gap-4 mb-6">
+                    <button id="backupDataBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all duration-300">
+                        Yedekle (JSON İndir)
+                    </button>
+                    <button id="restoreDataBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all duration-300">
+                        Yedekten Yükle
+                    </button>
+                    <input type="file" id="restoreFileInput" accept=".json" class="hidden">
+                    <button id="shareListBtn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all duration-300">
+                        Listeyi Paylaş (Link)
+                    </button>
+                </div>
+
+                <div id="category-content">
+                    <!-- Ürün Listeleri Buraya Gelecek -->
+                </div>
+            </div>
+
+            <!-- Gizli Dosya Yükleyici -->
+            <input type="file" id="imageUploader" class="hidden" accept="image/*">
+
+            <!-- Modallar -->
+            <div id="addProductModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">Yeni Ürün Ekle</h3>
+                    <form id="addProductForm" class="space-y-4">
+                        <div>
+                            <label for="newProductCategory" class="block text-sm font-medium text-gray-700">Ana Kategori (örn: Mutfak)</label>
+                            <input type="text" id="newProductCategory" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+                        </div>
+                        <div>
+                            <label for="newProductSubCategory" class="block text-sm font-medium text-gray-700">Alt Kategori (örn: Yemek Takımları)</label>
+                            <input type="text" id="newProductSubCategory" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+                        </div>
+                        <div>
+                            <label for="newProductName" class="block text-sm font-medium text-gray-700">Ürün Adı</label>
+                            <input type="text" id="newProductName" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+                        </div>
+                        <div>
+                            <label for="newProductQty" class="block text-sm font-medium text-gray-700">Adet/Set</label>
+                            <input type="text" id="newProductQty" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+                        </div>
+                        <div>
+                            <label for="newProductNotes" class="block text-sm font-medium text-gray-700">Notlar/Özellikler (isteğe bağlı)</label>
+                            <textarea id="newProductNotes" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"></textarea>
+                        </div>
+                        <div>
+                            <label for="newProductLink" class="block text-sm font-medium text-gray-700">Ürün Linki (isteğe bağlı)</label>
+                            <input type="url" id="newProductLink" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="https://www.example.com/urun">
+                        </div>
+                        <div>
+                            <label for="newProductPrice" class="block text-sm font-medium text-gray-700">Ürün Fiyatı (isteğe bağlı)</label>
+                            <input type="text" id="newProductPrice" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Örn: 1500" inputmode="numeric">
+                        </div>
+                        <div>
+                            <label for="newProductBrand" class="block text-sm font-medium text-gray-700">Marka (isteğe bağlı)</label>
+                            <input type="text" id="newProductBrand" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500" placeholder="Örn: Vestel">
+                        </div>
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">
+                            Ürünü Ekle
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="editProductModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">Ürünü Düzenle</h3>
+                    <form id="editProductForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Ana Kategori</label>
+                            <input type="text" id="editProductCategory" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100 text-gray-600 cursor-not-allowed" disabled>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Alt Kategori</label>
+                            <input type="text" id="editProductSubCategory" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-gray-100 text-gray-600 cursor-not-allowed" disabled>
+                        </div>
+                        <div>
+                            <label for="editProductName" class="block text-sm font-medium text-gray-700">Ürün Adı</label>
+                            <input type="text" id="editProductName" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+                        </div>
+                        <div>
+                            <label for="editProductQty" class="block text-sm font-medium text-gray-700">Adet/Set</label>
+                            <input type="text" id="editProductQty" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500" required>
+                        </div>
+                        <div>
+                            <label for="editProductNotes" class="block text-sm font-medium text-gray-700">Notlar/Özellikler (isteğe bağlı)</label>
+                            <textarea id="editProductNotes" rows="2" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500"></textarea>
+                        </div>
+                        <div>
+                            <label for="editProductLink" class="block text-sm font-medium text-gray-700">Ürün Linki (isteğe bağlı)</label>
+                            <input type="url" id="editProductLink" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label for="editProductPrice" class="block text-sm font-medium text-gray-700">Ürün Fiyatı (isteğe bağlı)</label>
+                            <input type="text" id="editProductPrice" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500" inputmode="numeric">
+                        </div>
+                        <div>
+                            <label for="editProductBrand" class="block text-sm font-medium text-gray-700">Marka (isteğe bağlı)</label>
+                            <input type="text" id="editProductBrand" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-emerald-500 focus:border-emerald-500">
+                        </div>
+                        <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">
+                            Değişiklikleri Kaydet
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="confirmationModal" class="modal">
+                <div class="modal-content">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">Onay Gerekiyor</h3>
+                    <p id="confirmationMessage" class="mb-6 text-gray-700"></p>
+                    <div class="flex justify-end space-x-4">
+                        <button id="cancelConfirmBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-md transition-colors duration-200">
+                            İptal
+                        </button>
+                        <button id="confirmBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">
+                            Onayla
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="productInfoModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-800" id="productInfoTitle"></h3>
+                    <div id="productInfoContent" class="text-gray-700 max-h-80 overflow-y-auto">
+                        <p id="productInfoBrand"></p>
+                        <p id="productInfoLink"></p>
+                        <p id="productInfoPrice"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="searchLinksModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-800" id="searchLinksTitle"></h3>
+                    <div id="productSearchResults" class="text-gray-700 flex flex-col space-y-3">
+                    </div>
+                </div>
+            </div>
+
+            <div id="purchasedItemsModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">Alınan Ürünler</h3>
+                    <div id="purchasedItemsList" class="text-gray-700 max-h-80 overflow-y-auto">
+                        <ul class="list-disc pl-5 space-y-1"></ul>
+                        <p class="mt-4 font-bold">Toplam Tutar: <span id="purchased-total-price">0,00 TL</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="remainingItemsModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">Kalan Ürünler</h3>
+                    <div id="remainingItemsList" class="text-gray-700 max-h-80 overflow-y-auto">
+                        <ul class="list-disc pl-5 space-y-1"></ul>
+                        <p class="mt-4 font-bold">Tahmini Kalan Tutar: <span id="remaining-total-price">0,00 TL</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="infoMessageModal" class="modal">
+                <div class="modal-content">
+                    <h3 class="text-xl font-bold mb-4 text-gray-800" id="infoMessageTitle">Bilgi</h3>
+                    <p id="infoMessageText" class="mb-6 text-gray-700"></p>
+                    <div class="flex justify-end">
+                        <button id="closeInfoMessageModalBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">
+                            Tamam
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="budgetSettingsModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">Bütçe Ayarları</h3>
+                    <form id="budgetSettingsForm" class="space-y-4">
+                        <div>
+                            <label for="totalBudget" class="block text-sm font-medium text-gray-700">Toplam Bütçe (TL)</label>
+                            <input type="text" id="totalBudget" class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-purple-500 focus:border-purple-500" placeholder="Örn: 50000" inputmode="numeric">
+                        </div>
+                        <button type="submit" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">
+                            Bütçeyi Kaydet
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div id="shareListModal" class="modal">
+                <div class="modal-content text-center">
+                    <span class="close-button">&times;</span>
+                    <h3 class="text-xl font-bold mb-4 text-gray-800">Listenizi Paylaşın</h3>
+                    <p class="mb-4 text-gray-700">Aşağıdaki linki kopyalayarak çeyiz listenizi başkalarıyla paylaşabilirsiniz. (Fotoğraflar paylaşılmaz)</p>
+                    <div class="flex flex-col gap-3">
+                        <input type="text" id="shareableLinkInput" class="w-full p-2 border border-gray-300 rounded-md bg-gray-50 text-gray-700" readonly>
+                        <button id="copyLinkBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition-colors duration-200">
+                            Linki Kopyala
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- YENİ: Fotoğraf Görüntüleme Modalı -->
+            <div id="imagePreviewModal" class="modal">
+                <div class="modal-content">
+                    <span class="close-button">&times;</span>
+                    <img id="full-product-image" src="" alt="Ürün Fotoğrafı">
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // GÜNCELLENDİ: Her ürüne 'productImage' alanı eklendi
+            let ceyizData = {
+                'Mutfak': [
+                    { cat: 'Tencere & Tava', name: 'Granit Tencere Seti', qty: 'Set', notes: 'Yapışmaz yüzey', productLink: '', productPrice: '', productBrand: '', tips: '...', productImage: '' },
+                    { cat: 'Tencere & Tava', name: 'Çelik Tencere Seti', qty: 'Set', notes: 'Farklı boyutlar', productLink: '', productPrice: '', productBrand: '', tips: '...', productImage: '' },
+                    // Diğer tüm ürünler için de productImage: '' eklenmiş gibi varsayılacak
+                    // ... (Mevcut listeniz buraya gelecek) ...
+                ],
+                // ... (Diğer kategoriler) ...
+            };
+
+            let state = {}; 
+            let totalBudget = 0; 
+            let confirmationCallback = null; 
+            let editingItem = { category: null, index: null }; 
+            // YENİ: Fotoğrafı düzenlenecek ürünü takip etmek için
+            let currentImageEdit = { category: null, index: null };
+
+            const categoryTabsContainer = document.getElementById('category-tabs');
+            const categoryContentContainer = document.getElementById('category-content');
+            const totalItemsEl = document.getElementById('total-items');
+            const purchasedItemsEl = document.getElementById('purchased-items');
+            const remainingItemsEl = document.getElementById('remaining-items');
+            const totalSpentEl = document.getElementById('total-spent'); 
+            const remainingBudgetEl = document.getElementById('remaining-budget'); 
+            const progressBarEl = document.getElementById('progress-bar');
+            const progressTextEl = document.getElementById('progress-text');
+            const chartCanvas = document.getElementById('progress-chart').getContext('2d');
+            let progressChart;
+            let currentCategory = Object.keys(ceyizData)[0];
+            
+            let filters = {
+                status: 'all',
+                minPrice: null,
+                maxPrice: null,
+                searchTerm: ''
+            };
+            let currentSort = 'default';
+            
+            function initializeState() {
+                let savedCeyizData = JSON.parse(localStorage.getItem('ceyizData'));
+                const savedState = JSON.parse(localStorage.getItem('ceyizState'));
+                const savedTotalBudget = localStorage.getItem('totalBudget');
+
+                // Eğer kayıtlı veri yoksa, başlangıç verisini kullan
+                if (!savedCeyizData) {
+                    // Başlangıç verisini kopyala
+                    const initialData = { /* Orijinal 267 ürün listesi buraya yapıştırılacak */ };
+                    // ÖNEMLİ: Aşağıdaki satırı kendi orijinal listenizle doldurun.
+                    // Ben şimdilik boş bırakıyorum ama sizin kodunuzda dolu olmalı.
+                    savedCeyizData = initialData;
+                }
+
+                // Her bir ürüne productImage ve diğer alanların varlığını kontrol et ve ekle
+                Object.keys(savedCeyizData).forEach(category => {
+                    savedCeyizData[category].forEach(item => {
+                        if (item.productImage === undefined) item.productImage = '';
+                        if (item.productLink === undefined) item.productLink = '';
+                        if (item.productPrice === undefined) item.productPrice = '';
+                        if (item.productBrand === undefined) item.productBrand = '';
+                        if (item.tips === undefined) item.tips = '';
+                    });
+                });
+                ceyizData = savedCeyizData;
+
+                if (savedState) {
+                    state = savedState;
+                } else {
+                    Object.keys(ceyizData).forEach(category => {
+                        state[category] = {};
+                        ceyizData[category].forEach((item, index) => {
+                            state[category][index] = false;
+                        });
+                    });
+                }
+
+                if (savedTotalBudget) {
+                    totalBudget = parseFloat(savedTotalBudget);
+                }
+
+                Object.keys(ceyizData).forEach(category => {
+                    if (!state[category]) {
+                        state[category] = {};
+                    }
+                    ceyizData[category].forEach((item, index) => {
+                        if (state[category][index] === undefined) {
+                            state[category][index] = false; 
+                        }
+                    });
+                    for (const idx in state[category]) {
+                        if (ceyizData[category] && !ceyizData[category][idx]) {
+                            delete state[category][idx];
+                        }
+                    }
+                });
+                for (const category in state) {
+                    if (!ceyizData[category]) {
+                        delete state[category];
+                    }
+                }
+            }
+            
+            function saveData() {
+                localStorage.setItem('ceyizData', JSON.stringify(ceyizData));
+                localStorage.setItem('ceyizState', JSON.stringify(state));
+                localStorage.setItem('totalBudget', totalBudget.toString());
+            }
+
+            function sortCeyizData() {
+                Object.keys(ceyizData).forEach(mainCategory => {
+                    if (ceyizData[mainCategory]) { 
+                        ceyizData[mainCategory].sort((a, b) => {
+                            const catCompare = a.cat.localeCompare(b.cat, 'tr', { sensitivity: 'base' });
+                            if (catCompare !== 0) {
+                                return catCompare;
+                            }
+                            return a.name.localeCompare(b.name, 'tr', { sensitivity: 'base' });
+                        });
+                    }
+                });
+            }
+
+            function renderTabs() {
+                const categories = Object.keys(ceyizData).sort((a,b) => a.localeCompare(b, 'tr', { sensitivity: 'base' }));
+                categoryTabsContainer.innerHTML = categories.map((cat) => `
+                    <button data-category="${cat}" class="tab-btn px-4 py-2 text-sm font-semibold rounded-md transition-colors duration-200 ${cat === currentCategory ? 'tab-active' : 'tab-inactive'}">
+                        ${cat}
+                    </button>
+                `).join('');
+
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        currentCategory = btn.dataset.category;
+                        applyAndRender(); 
+                        document.querySelectorAll('.tab-btn').forEach(b => b.classList.replace('tab-active', 'tab-inactive'));
+                        btn.classList.replace('tab-inactive', 'tab-active');
+                    });
+                });
+            }
+            
+            function renderContent(category) {
+                let items = ceyizData[category] ? [...ceyizData[category]] : [];
+                items = items.map((item, index) => ({...item, originalIndex: index }));
+                
+                if (filters.searchTerm) {
+                    items = items.filter(item => item.name.toLowerCase().includes(filters.searchTerm));
+                }
+                if (filters.status === 'purchased') {
+                    items = items.filter(item => state[category] && state[category][item.originalIndex]);
+                } else if (filters.status === 'unpurchased') {
+                    items = items.filter(item => !state[category] || !state[category][item.originalIndex]);
+                }
+                if (filters.minPrice !== null) {
+                    items = items.filter(item => (item.productPrice || 0) >= filters.minPrice);
+                }
+                if (filters.maxPrice !== null) {
+                    items = items.filter(item => (item.productPrice || 0) <= filters.maxPrice);
+                }
+                
+                if (currentSort === 'price-asc') items.sort((a, b) => (a.productPrice || 0) - (b.productPrice || 0));
+                else if (currentSort === 'price-desc') items.sort((a, b) => (b.productPrice || 0) - (a.productPrice || 0));
+                else if (currentSort === 'name-asc') items.sort((a, b) => a.name.localeCompare(b.name, 'tr'));
+                else if (currentSort === 'name-desc') items.sort((a, b) => b.name.localeCompare(a.name, 'tr'));
+
+                if (!items || items.length === 0) {
+                     categoryContentContainer.innerHTML = `
+                         <div class="mb-4 flex flex-wrap gap-2 justify-center">
+                             <button id="openAddProductModalBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all duration-300">
+                                + Yeni Ürün Ekle
+                            </button>
+                         </div>
+                         <p class="text-center text-gray-600 mt-4">Bu kategori veya filtreler için gösterilecek ürün bulunmamaktadır.</p>
+                     `;
+                      document.getElementById('openAddProductModalBtn').addEventListener('click', openAddProductModal);
+                     return;
+                }
+
+                const groupedItems = items.reduce((acc, item) => {
+                    const key = (currentSort === 'default') ? item.cat : 'Sıralama Sonuçları';
+                    (acc[key] = acc[key] || []).push(item);
+                    return acc;
+                }, {});
+
+                let contentHtml = `
+                    <div class="mb-4 flex flex-wrap gap-2 justify-center">
+                        <button id="openAddProductModalBtn" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all duration-300">
+                            + Yeni Ürün Ekle
+                        </button>
+                        <button id="unmarkAllItemsBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-xl shadow-md transition-all duration-300">
+                            Tümünün İşaretini Kaldır
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto"><table class="w-full text-sm text-left text-gray-500">`;
+
+                for (const groupName in groupedItems) {
+                    contentHtml += `
+                        <thead class="text-xs text-emerald-700 uppercase bg-emerald-50">
+                            <tr>
+                                <th class="p-4"></th>
+                                <th class="px-6 py-3">Fotoğraf</th> <!-- YENİ -->
+                                <th scope="col" class="px-6 py-3">${groupName}</th>
+                                <th scope="col" class="px-6 py-3">Adet/Set</th>
+                                <th scope="col" class="px-6 py-3">Notlar</th>
+                                <th scope="col" class="px-6 py-3 text-center">Ürün Bilgisi</th>
+                                <th scope="col" class="px-6 py-3 text-center">Araştır</th>
+                                <th scope="col" class="px-6 py-3 text-center">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white">`;
+
+                    groupedItems[groupName].forEach((item) => {
+                         const itemFullIndex = item.originalIndex;
+                         const isChecked = state[category] && state[category][itemFullIndex];
+                        contentHtml += `
+                            <tr class="border-b hover:bg-gray-50 ${isChecked ? 'table-row-completed' : ''} product-item">
+                                <td class="p-4">
+                                    <input type="checkbox" data-category="${category}" data-index="${itemFullIndex}" 
+                                           class="w-5 h-5 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500" ${isChecked ? 'checked' : ''}>
+                                </td>
+                                <!-- YENİ: Fotoğraf Sütunu -->
+                                <td class="px-6 py-2">
+                                    <div class="product-image-container">
+                                        ${item.productImage ? 
+                                            `<img src="${item.productImage}" class="product-thumbnail" data-category="${category}" data-index="${itemFullIndex}" alt="${item.name}">` :
+                                            `<button class="add-photo-btn" data-category="${category}" data-index="${itemFullIndex}">+</button>`
+                                        }
+                                    </div>
+                                </td>
+                                <th scope="row" class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap ${isChecked ? 'text-gray-400' : ''}">${item.name}</th>
+                                <td class="px-6 py-4">${item.qty}</td>
+                                <td class="px-6 py-4">${(item.notes || '')}</td>
+                                <td class="px-6 py-4 text-center">
+                                    <button class="product-info-btn bg-purple-400 hover:bg-purple-500 text-white font-bold py-1 px-3 rounded-full text-xs" data-category="${category}" data-index="${itemFullIndex}">
+                                        Bilgi
+                                    </button>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <button class="search-btn bg-orange-400 hover:bg-orange-500 text-white font-bold py-1 px-3 rounded-full text-xs" data-item-name="${item.name}">
+                                        🔍 Ara
+                                    </button>
+                                </td>
+                                <td class="px-6 py-4 text-center">
+                                    <div class="flex flex-col sm:flex-row gap-2 items-center justify-center">
+                                        <button class="edit-btn bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-1 px-3 rounded-full text-xs" data-category="${category}" data-index="${itemFullIndex}">
+                                            Düzelt
+                                        </button>
+                                        <button class="delete-btn bg-red-400 hover:bg-red-500 text-white font-bold py-1 px-3 rounded-full text-xs" data-category="${category}" data-index="${itemFullIndex}">
+                                            Sil
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                    contentHtml += `</tbody>`;
+                }
+                contentHtml += `</table></div>`;
+                categoryContentContainer.innerHTML = contentHtml;
+                
+                document.getElementById('openAddProductModalBtn').addEventListener('click', openAddProductModal);
+                document.getElementById('unmarkAllItemsBtn').addEventListener('click', () => {
+                    showConfirmationModal('Tüm işaretli ürünlerin işaretini kaldırmak istediğinizden emin misiniz?', () => unmarkAllItems());
+                });
+                document.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', (e) => openEditProductModal(e.target.dataset.category, e.target.dataset.index)));
+                document.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', (e) => showConfirmationModal(`'${ceyizData[e.target.dataset.category][e.target.dataset.index].name}' ürününü silmek istediğinizden emin misiniz?`, () => deleteItem(e.target.dataset.category, e.target.dataset.index))));
+                document.querySelectorAll('.product-info-btn').forEach(btn => btn.addEventListener('click', (e) => showProductInfoModal(e.target.dataset.category, e.target.dataset.index)));
+                document.querySelectorAll('.search-btn').forEach(btn => btn.addEventListener('click', (e) => showSearchLinksModal(e.target.dataset.itemName)));
+                
+                // YENİ: Fotoğraf ekleme ve görüntüleme olayları
+                document.querySelectorAll('.add-photo-btn').forEach(btn => btn.addEventListener('click', (e) => triggerImageUpload(e.target.dataset.category, e.target.dataset.index)));
+                document.querySelectorAll('.product-thumbnail').forEach(img => img.addEventListener('click', (e) => showImagePreview(e.target.src)));
+            }
+
+            function applyAndRender() {
+                filters.status = document.getElementById('filter-status').value;
+                const minPriceVal = document.getElementById('filter-min-price').value;
+                const maxPriceVal = document.getElementById('filter-max-price').value;
+                filters.minPrice = minPriceVal ? parseFloat(minPriceVal) : null;
+                filters.maxPrice = maxPriceVal ? parseFloat(maxPriceVal) : null;
+                filters.searchTerm = document.getElementById('searchInput').value.toLowerCase();
+                currentSort = document.getElementById('sort-by').value;
+                renderContent(currentCategory);
+            }
+
+            function clearFiltersAndRender() {
+                document.getElementById('filter-status').value = 'all';
+                document.getElementById('filter-min-price').value = '';
+                document.getElementById('filter-max-price').value = '';
+                document.getElementById('sort-by').value = 'default';
+                document.getElementById('searchInput').value = '';
+                filters = { status: 'all', minPrice: null, maxPrice: null, searchTerm: '' };
+                currentSort = 'default';
+                renderContent(currentCategory);
+            }
+
+            function updateDashboard() {
+                let total = 0, purchased = 0, totalSpent = 0;
+                const categoryTotals = {}, categoryPurchased = {};
+
+                Object.keys(ceyizData).forEach(category => {
+                    categoryTotals[category] = ceyizData[category].length;
+                    categoryPurchased[category] = 0;
+                    total += ceyizData[category].length;
+                    ceyizData[category].forEach((item, index) => {
+                        if (state[category] && state[category][index]) {
+                            purchased++;
+                            categoryPurchased[category]++;
+                            if (typeof item.productPrice === 'number' && !isNaN(item.productPrice)) {
+                                totalSpent += item.productPrice;
+                            }
+                        }
+                    });
+                });
+
+                const remaining = total - purchased;
+                const progress = total > 0 ? (purchased / total) * 100 : 0;
+                const remainingBudget = totalBudget - totalSpent;
+
+                totalItemsEl.textContent = total;
+                purchasedItemsEl.textContent = purchased;
+                remainingItemsEl.textContent = remaining;
+                totalSpentEl.textContent = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(totalSpent);
+                remainingBudgetEl.textContent = new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(remainingBudget);
+                progressBarEl.style.width = `${progress}%`;
+                progressTextEl.textContent = `Tamamlanma Oranı: ${progress.toFixed(1)}%`;
+
+                updateChart(categoryTotals, categoryPurchased);
+                saveData();
+            }
+
+            function updateChart(categoryTotals, categoryPurchased) {
+                const labels = Object.keys(categoryTotals);
+                const data = labels.map(cat => categoryPurchased[cat]);
+                const backgroundColors = ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0', '#d1fae5'];
+
+                if (progressChart) {
+                    progressChart.data.labels = labels;
+                    progressChart.data.datasets[0].data = data;
+                    progressChart.update();
+                } else {
+                    progressChart = new Chart(chartCanvas, {
+                        type: 'doughnut',
+                        data: { labels, datasets: [{ label: 'Alınan Ürünler', data, backgroundColor: backgroundColors, hoverOffset: 4 }] },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            plugins: {
+                                legend: { position: 'bottom', labels: { font: { size: 10 } } },
+                                title: { display: true, text: 'Kategoriye Göre İlerleme', font: { size: 16 } },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '', value = context.raw || 0, total = categoryTotals[label];
+                                            const percentage = total > 0 ? (value / total * 100).toFixed(1) : 0;
+                                            return `${label}: ${value} / ${total} (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+            }
+            
+            categoryContentContainer.addEventListener('change', (e) => {
+                if (e.target.type === 'checkbox') {
+                    const { category, index } = e.target.dataset;
+                    state[category][index] = e.target.checked;
+                    e.target.closest('tr').classList.toggle('table-row-completed', e.target.checked);
+                    e.target.closest('tr').querySelector('th').classList.toggle('text-gray-400', e.target.checked);
+                    updateDashboard();
+                }
+            });
+
+            function openAddProductModal() {
+                document.getElementById('addProductModal').style.display = 'flex';
+                document.getElementById('newProductCategory').value = currentCategory;
+                document.getElementById('newProductPrice').value = '';
+            }
+
+            document.getElementById('addProductForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const mainCategory = document.getElementById('newProductCategory').value.trim();
+                const subCategory = document.getElementById('newProductSubCategory').value.trim();
+                const productName = document.getElementById('newProductName').value.trim();
+                const productQty = document.getElementById('newProductQty').value.trim();
+                const productNotes = document.getElementById('newProductNotes').value.trim();
+                const productLink = document.getElementById('newProductLink').value.trim();
+                const productPriceRaw = document.getElementById('newProductPrice').value.trim();
+                const productPrice = productPriceRaw ? parseFloat(productPriceRaw.replace(/[^0-9]/g, '')) : null;
+                const productBrand = document.getElementById('newProductBrand').value.trim(); 
+
+                if (!mainCategory || !subCategory || !productName || !productQty) {
+                    showMessageModal('Hata', 'Lütfen tüm zorunlu alanları doldurun.', () => {});
+                    return;
+                }
+
+                const newItem = {
+                    cat: subCategory, name: productName, qty: productQty, notes: productNotes,
+                    productLink, productPrice, productBrand, tips: '', productImage: '' // YENİ
+                };
+
+                if (!ceyizData[mainCategory]) {
+                    ceyizData[mainCategory] = [];
+                    state[mainCategory] = {};
+                }
+                
+                ceyizData[mainCategory].push(newItem);
+                const newIndex = ceyizData[mainCategory].length - 1;
+                state[mainCategory][newIndex] = false;
+
+                sortCeyizData(); 
+                document.getElementById('addProductModal').style.display = 'none';
+                document.getElementById('addProductForm').reset();
+                renderTabs();
+                applyAndRender();
+                updateDashboard();
+            });
+            
+            function openEditProductModal(category, index) {
+                editingItem = { category, index };
+                const item = ceyizData[category][index];
+                document.getElementById('editProductModal').style.display = 'flex';
+                document.getElementById('editProductCategory').value = category;
+                document.getElementById('editProductSubCategory').value = item.cat;
+                document.getElementById('editProductName').value = item.name;
+                document.getElementById('editProductQty').value = item.qty;
+                document.getElementById('editProductNotes').value = item.notes;
+                document.getElementById('editProductLink').value = item.productLink;
+                document.getElementById('editProductPrice').value = item.productPrice || '';
+                document.getElementById('editProductBrand').value = item.productBrand; 
+            }
+
+            document.getElementById('editProductForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const { category, index } = editingItem;
+                if (category === null || index === null) return;
+                const productPriceRaw = document.getElementById('editProductPrice').value.trim();
+                const item = ceyizData[category][index];
+                item.name = document.getElementById('editProductName').value.trim();
+                item.qty = document.getElementById('editProductQty').value.trim();
+                item.notes = document.getElementById('editProductNotes').value.trim();
+                item.productLink = document.getElementById('editProductLink').value.trim();
+                item.productPrice = productPriceRaw ? parseFloat(productPriceRaw.replace(/[^0-9]/g, '')) : null;
+                item.productBrand = document.getElementById('editProductBrand').value.trim();
+                
+                sortCeyizData();
+                document.getElementById('editProductModal').style.display = 'none';
+                applyAndRender();
+                updateDashboard();
+            });
+
+            function showConfirmationModal(message, callback) {
+                document.getElementById('confirmationMessage').textContent = message;
+                document.getElementById('confirmationModal').style.display = 'flex';
+                confirmationCallback = callback;
+            }
+
+            document.getElementById('confirmBtn').addEventListener('click', () => {
+                if (confirmationCallback) confirmationCallback();
+                document.getElementById('confirmationModal').style.display = 'none';
+            });
+            document.getElementById('cancelConfirmBtn').addEventListener('click', () => document.getElementById('confirmationModal').style.display = 'none');
+            
+            function deleteItem(category, index) {
+                if (ceyizData[category] && ceyizData[category][index]) {
+                    ceyizData[category].splice(index, 1);
+                    const oldState = state[category];
+                    const newStateForCategory = {};
+                    Object.keys(oldState).forEach(oldIdx => {
+                       const numericOldIdx = parseInt(oldIdx);
+                       if(numericOldIdx < index) newStateForCategory[numericOldIdx] = oldState[numericOldIdx];
+                       else if (numericOldIdx > index) newStateForCategory[numericOldIdx - 1] = oldState[numericOldIdx];
+                    });
+                    state[category] = newStateForCategory;
+                    applyAndRender();
+                    updateDashboard();
+                }
+            }
+            
+            function showProductInfoModal(category, index) {
+                const item = ceyizData[category][index];
+                document.getElementById('productInfoModal').style.display = 'flex';
+                document.getElementById('productInfoTitle').textContent = `${item.name} Ürün Bilgisi`;
+                document.getElementById('productInfoBrand').textContent = item.productBrand ? `Marka: ${item.productBrand}` : 'Marka: Bilgi Yok';
+                document.getElementById('productInfoLink').innerHTML = item.productLink ? `<strong>Link:</strong> <a href="${item.productLink}" target="_blank" class="text-blue-600 hover:underline">${item.productLink}</a>` : 'Link: Bilgi Yok';
+                document.getElementById('productInfoPrice').textContent = item.productPrice ? `Fiyat: ${new Intl.NumberFormat('tr-TR', { style: 'currency', currency: 'TRY' }).format(item.productPrice)}` : 'Fiyat: Bilgi Yok';
+            }
+
+            function showSearchLinksModal(productName) {
+                const searchLinksModal = document.getElementById('searchLinksModal');
+                document.getElementById('searchLinksTitle').textContent = `'${productName}' için Arama Sonuçları`;
+                const productSearchResults = document.getElementById('productSearchResults');
+                productSearchResults.innerHTML = ''; 
+                const encodedProductName = encodeURIComponent(productName);
+                const searchPlatforms = [
+                    { name: 'Hepsiburada', url: `https://www.hepsiburada.com/ara?q=${encodedProductName}` },
+                    { name: 'Trendyol', url: `https://www.trendyol.com/sr?q=${encodedProductName}` },
+                    { name: 'N11', url: `https://www.n11.com/arama?q=${encodedProductName}` },
+                    { name: 'Amazon', url: `https://www.amazon.com.tr/s?k=${encodedProductName}` }
+                ];
+                searchPlatforms.forEach(platform => {
+                    const link = document.createElement('a');
+                    link.href = platform.url;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    link.className = 'bg-blue-100 hover:bg-blue-200 text-blue-800 font-semibold py-2 px-4 rounded-md text-center';
+                    link.textContent = `${platform.name} üzerinde Ara`;
+                    productSearchResults.appendChild(link);
+                });
+                searchLinksModal.style.display = 'flex';
+            }
+
+            function formatCurrencyInput(event) {
+                let value = event.target.value.replace(/[^0-9]/g, ''); 
+                if (value === '') { event.target.value = ''; return; };
+                event.target.value = new Intl.NumberFormat('tr-TR').format(parseInt(value, 10));
+            }
+
+            function showPurchasedItemsModal() { /* Bu fonksiyon değişmedi */ }
+            function showRemainingItemsModal() { /* Bu fonksiyon değişmedi */ }
+            
+            function showMessageModal(title, message, callback) {
+                document.getElementById('infoMessageTitle').textContent = title;
+                document.getElementById('infoMessageText').textContent = message;
+                document.getElementById('infoMessageModal').style.display = 'flex';
+                document.getElementById('closeInfoMessageModalBtn').onclick = () => {
+                    document.getElementById('infoMessageModal').style.display = 'none';
+                    if (callback) callback();
+                };
+            }
+
+            function unmarkAllItems() {
+                Object.keys(state).forEach(category => {
+                    if (state[category]) Object.keys(state[category]).forEach(index => state[category][index] = false);
+                });
+                applyAndRender(); 
+                updateDashboard();
+                showMessageModal('İşaretler Kaldırıldı', 'Tüm ürünlerin işaretleri başarıyla kaldırıldı.', null);
+            }
+            
+            function backupData() {
+                const dataToSave = { ceyizData, ceyizState: state, totalBudget };
+                const blob = new Blob([JSON.stringify(dataToSave, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'ceyiz_listesi_yedek.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                a.remove();
+                showMessageModal('Yedekleme Başarılı', 'Çeyiz listeniz "ceyiz_listesi_yedek.json" olarak indirildi.', null);
+            }
+
+            document.getElementById('restoreDataBtn').addEventListener('click', () => document.getElementById('restoreFileInput').click());
+            document.getElementById('restoreFileInput').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const loadedData = JSON.parse(e.target.result);
+                        if (loadedData.ceyizData && loadedData.ceyizState) {
+                            showConfirmationModal('Mevcut verileriniz DEĞİŞTİRİLECEKTİR. Emin misiniz?', () => {
+                                ceyizData = loadedData.ceyizData;
+                                state = loadedData.ceyizState;
+                                totalBudget = loadedData.totalBudget !== undefined ? loadedData.totalBudget : 0;
+                                initializeState(); // Veri yapısını doğrulamak için
+                                sortCeyizData();
+                                saveData(); 
+                                renderTabs();
+                                currentCategory = Object.keys(ceyizData)[0] || null;
+                                applyAndRender();
+                                updateDashboard();
+                                showMessageModal('Yedekleme Yüklendi', 'Çeyiz listeniz başarıyla yüklendi.', null);
+                            });
+                        } else { showMessageModal('Yükleme Hatası', 'Dosya geçerli bir yedek dosyası değil.', null); }
+                    } catch (error) { showMessageModal('Yükleme Hatası', `Dosya okunamadı: ${error.message}`, null); }
+                };
+                reader.readAsText(file);
+                event.target.value = '';
+            });
+
+            document.getElementById('add-category-btn').addEventListener('click', () => { /* Bu fonksiyon değişmedi */ });
+            document.getElementById('delete-category-btn').addEventListener('click', () => { /* Bu fonksiyon değişmedi */ });
+            
+            function openBudgetSettingsModal() { /* Bu fonksiyon değişmedi */ }
+            document.getElementById('budgetSettingsForm').addEventListener('submit', function(e) { /* Bu fonksiyon değişmedi */ });
+            
+            function openShareListModal() {
+                // Fotoğraf verileri büyük olduğu için paylaşımdan çıkarılıyor
+                const dataToShare = JSON.parse(JSON.stringify({ ceyizData, ceyizState: state })); // Deep copy
+                Object.keys(dataToShare.ceyizData).forEach(category => {
+                    dataToShare.ceyizData[category].forEach(item => {
+                        item.productImage = ''; // Fotoğrafları temizle
+                    });
+                });
+                const encodedData = btoa(unescape(encodeURIComponent(JSON.stringify(dataToShare)))); 
+                document.getElementById('shareableLinkInput').value = `${window.location.origin}${window.location.pathname}?data=${encodedData}`;
+                document.getElementById('shareListModal').style.display = 'flex';
+            }
+            
+            document.getElementById('copyLinkBtn').addEventListener('click', () => { /* Bu fonksiyon değişmedi */ });
+            function loadDataFromURL() { /* Bu fonksiyon değişmedi */ }
+
+            // YENİ: Fotoğraf işleme fonksiyonları
+            function triggerImageUpload(category, index) {
+                currentImageEdit = { category, index };
+                document.getElementById('imageUploader').click();
+            }
+
+            function showImagePreview(imageData) {
+                document.getElementById('full-product-image').src = imageData;
+                document.getElementById('imagePreviewModal').style.display = 'flex';
+            }
+
+            document.getElementById('imageUploader').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const { category, index } = currentImageEdit;
+                if (category === null || index === null) return;
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const MAX_WIDTH = 800;
+                        const MAX_HEIGHT = 800;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Resmi sıkıştırılmış JPEG olarak kaydet
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        
+                        ceyizData[category][index].productImage = dataUrl;
+                        saveData();
+                        applyAndRender();
+                    }
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(file);
+                
+                // Input'u temizle ki aynı dosya tekrar seçilebilsin
+                event.target.value = '';
+            });
+
+            function init() {
+                // Orijinal 267 ürün listesini buraya ekleyin
+                const initialCeyizData = {
+                    'Mutfak': [
+                        { cat: 'Tencere & Tava', name: 'Granit Tencere Seti', qty: 'Set', notes: 'Yapışmaz yüzey', productLink: '', productPrice: '', productBrand: '', tips: 'Granit tencere setleri, yapışmaz yüzeyleri sayesinde yiyeceklerin dibine yapışmasını engeller ve kolay temizlenir. Uzun ömürlü kullanım için çizilmelere dikkat edin ve metal yerine silikon veya ahşap mutfak gereçleri tercih edin.' },
+                        { cat: 'Tencere & Tava', name: 'Çelik Tencere Seti', qty: 'Set', notes: 'Farklı boyutlar', productLink: '', productPrice: '', productBrand: '', tips: 'Çelik tencere setleri, dayanıklılıkları ve sağlıklı yapılarıyla öne çıkar. Yüksek ısıya dayanıklıdır ve bulaşık makinesinde yıkanabilir. Taban kalınlığına dikkat edin, ısıyı homojen dağıtan modeller daha iyi performans sunar.' },
+                        // ... Tüm 267 ürün buraya gelecek
+                    ],
+                    // ... Diğer kategoriler
+                };
+                
+                // Eğer localStorage boşsa, başlangıç verisini yükle
+                if (!localStorage.getItem('ceyizData')) {
+                    // Her ürüne boş productImage alanı ekle
+                    Object.keys(initialCeyizData).forEach(category => {
+                        initialCeyizData[category].forEach(item => {
+                            item.productImage = '';
+                        });
+                    });
+                    localStorage.setItem('ceyizData', JSON.stringify(initialCeyizData));
+                }
+
+
+                initializeState();
+                sortCeyizData();
+                loadDataFromURL(); 
+                
+                renderTabs();
+                if (!Object.keys(ceyizData).includes(currentCategory)) {
+                    currentCategory = Object.keys(ceyizData)[0] || null;
+                }
+                applyAndRender();
+                updateDashboard();
+                
+                document.getElementById('newProductPrice').addEventListener('input', formatCurrencyInput);
+                document.getElementById('editProductPrice').addEventListener('input', formatCurrencyInput);
+                document.getElementById('totalBudget').addEventListener('input', formatCurrencyInput);
+                document.getElementById('apply-filters-btn').addEventListener('click', applyAndRender);
+                document.getElementById('clear-filters-btn').addEventListener('click', clearFiltersAndRender);
+                document.getElementById('searchInput').addEventListener('input', applyAndRender);
+                document.getElementById('purchased-items').addEventListener('click', showPurchasedItemsModal);
+                document.getElementById('remaining-items').addEventListener('click', showRemainingItemsModal);
+                document.getElementById('set-budget-btn').addEventListener('click', openBudgetSettingsModal);
+                document.getElementById('backupDataBtn').addEventListener('click', backupData);
+                document.getElementById('shareListBtn').addEventListener('click', openShareListModal);
+                
+                document.querySelectorAll('.modal .close-button').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.target.closest('.modal').style.display = 'none';
+                    });
+                });
+            }
+
+            init();
+        });
+    </script>
+</body>
+</html>
