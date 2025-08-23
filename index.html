@@ -79,6 +79,19 @@
             height: 100%;
             object-fit: cover;
         }
+        #productInfoImage.has-image {
+            cursor: zoom-in;
+        }
+        #imageLightbox .modal-content {
+            margin: auto;
+            display: block;
+            width: auto;
+            height: auto;
+            max-width: 90vw;
+            max-height: 90vh;
+            background: none;
+            box-shadow: none;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -352,9 +365,11 @@
                 <div class="modal-content">
                     <span class="close-button" id="closeProductInfoModalBtn">&times;</span>
                     <h3 class="text-xl font-bold mb-4 text-gray-800" id="productInfoTitle"></h3>
-                    <!-- YENİ: Fotoğraf Görüntüleme Alanı -->
                     <div id="productInfoImageContainer" class="mb-4 flex justify-center">
-                        <img id="productInfoImage" src="" alt="Ürün Fotoğrafı" class="max-w-full h-auto max-h-64 rounded-lg shadow-md hidden">
+                        <!-- YENİ: Fotoğraf link ve resim etiketi -->
+                        <a id="productInfoImageLink" href="#" target="_blank" rel="noopener noreferrer">
+                            <img id="productInfoImage" src="" alt="Ürün Fotoğrafı" class="max-w-full h-auto max-h-64 rounded-lg shadow-md hidden">
+                        </a>
                     </div>
                     <div id="productInfoContent" class="text-gray-700 max-h-80 overflow-y-auto">
                         <p id="productInfoBrand"></p>
@@ -443,6 +458,13 @@
                     </div>
                 </div>
             </div>
+
+            <!-- YENİ: Fotoğraf Görüntüleyici Modalı (Lightbox) -->
+            <div id="imageLightbox" class="modal" style="background-color: rgba(0,0,0,0.8);">
+                <span class="close-button" id="closeLightbox" style="color: white; font-size: 40px; top: 20px; right: 35px;">&times;</span>
+                <img class="modal-content" id="lightboxImage">
+            </div>
+
         </main>
     </div>
 
@@ -1443,16 +1465,21 @@
                 const item = ceyizData[category][index];
                 const modal = document.getElementById('productInfoModal');
                 const img = document.getElementById('productInfoImage');
+                const link = document.getElementById('productInfoImageLink');
 
                 modal.style.display = 'flex';
                 document.getElementById('productInfoTitle').textContent = `${item.name} Ürün Bilgisi`;
                 
-                // YENİ: Fotoğrafı göster veya gizle
                 if (item.productImage) {
                     img.src = item.productImage;
+                    link.href = item.productImage;
                     img.classList.remove('hidden');
+                    img.classList.add('has-image');
                 } else {
+                    img.src = '';
+                    link.href = '#';
                     img.classList.add('hidden');
+                    img.classList.remove('has-image');
                 }
 
                 document.getElementById('productInfoBrand').textContent = item.productBrand ? `Marka: ${item.productBrand}` : 'Marka: Bilgi Yok';
