@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evrensel Araç Kutusu</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide-react@0.378.0/dist/lucide-react.js"></script>
+    <script>
+        // Lucide ikonlarını React olmadan kullanmak için bir yardımcı
+        const createLucideIcon = (name, props) => React.createElement(lucide[name], props);
+    </script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* bg-slate-900 */
+        }
+        .drag-over {
+            border-color: #3b82f6; /* blue-500 */
+            background-color: #1e293b; /* slate-800 */
+        }
+        .progress-bar-inner {
+            transition: width 0.3s ease-in-out;
+        }
+        /* Özel animasyonlar */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white antialiased">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
+
+        <!-- Başlık ve Dil Seçimi -->
+        <header class="flex justify-between items-center mb-8">
+            <div class="flex items-center space-x-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m11.5 15.5 3-3-3-3"></path></svg>
+                <h1 class="text-2xl md:text-3xl font-bold text-slate-100" data-translate-key="title">Evrensel Araç Kutusu</h1>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="lang-tr" class="px-3 py-1 text-sm rounded-md bg-blue-600 font-semibold">TR</button>
+                <button id="lang-en" class="px-3 py-1 text-sm rounded-md bg-slate-700 hover:bg-slate-600 font-semibold transition-colors">EN</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Ana Dosya Yükleme Alanı -->
+            <section id="drop-zone" class="w-full border-2 border-dashed border-slate-600 rounded-xl p-8 md:p-12 text-center cursor-pointer transition-all duration-300 hover:border-blue-500 hover:bg-slate-800">
+                <div class="flex flex-col items-center justify-center space-y-4 text-slate-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-500"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg>
+                    <p class="text-lg font-medium" data-translate-key="drop_zone_text">Dosyaları buraya sürükleyip bırakın</p>
+                    <p class="text-slate-500" data-translate-key="or">veya</p>
+                    <button id="file-select-btn" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors" data-translate-key="select_file_btn">Dosya Seç</button>
+                    <input type="file" id="file-input" class="hidden" multiple>
+                </div>
+            </section>
+
+            <!-- Yüklenen Dosyalar Listesi -->
+            <section id="file-list-section" class="mt-8 hidden">
+                <div id="file-list" class="space-y-3">
+                    <!-- Dosya öğeleri buraya dinamik olarak eklenecek -->
+                </div>
+
+                <!-- İşlem Butonları -->
+                <div id="action-buttons" class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                     <div class="text-sm text-slate-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline mr-1"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 6v6l4 2"></path></svg>
+                        <span data-translate-key="auto_delete_note">Dosyalar 24 saat sonra otomatik olarak silinir.</span>
+                    </div>
+                    <div class="flex gap-4">
+                        <button id="add-more-btn" class="bg-slate-600 text-slate-100 font-semibold px-6 py-3 rounded-lg hover:bg-slate-700 transition-colors w-full sm:w-auto" data-translate-key="add_more_btn">Daha Fazla Ekle</button>
+                        <button id="convert-btn" class="bg-green-600 text-white font-bold px-8 py-3 rounded-lg hover:bg-green-700 transition-colors w-full sm:w-auto flex items-center justify-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
+                            <span data-translate-key="convert_btn">İşlemi Başlat</span>
+                        </button>
+                    </div>
+                </div>
+                
+                 <!-- Toplu İndirme Butonu (Gizli) -->
+                <div id="batch-download-section" class="mt-6 text-center hidden">
+                    <button id="download-zip-btn" class="bg-blue-600 text-white font-bold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 mx-auto">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
+                        <span data-translate-key="download_all_zip">Tümünü ZIP Olarak İndir</span>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Araçlar -->
+            <section class="mt-16 space-y-12">
+                <div>
+                    <h2 class="text-xl font-semibold mb-4 text-slate-300" data-translate-key="pdf_tools_title">PDF Araçları</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-purple-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M12 12v6"></path><path d="M9 15h6"></path></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_merge_pdf">PDF Birleştir</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-purple-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><path d="M15 12H9"></path><path d="M21 15h-3"></path><path d="M21 9h-3"></path><path d="M3 15h3"></path><path d="M3 9h3"></path></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_split_pdf">PDF Ayır</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-red-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M10 15.5v-5"></path><path d="M13 15.5v-5"></path><path d="M16 15.5v-5"></path></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_compress_pdf">PDF Sıkıştır</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-blue-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M8 18h1" /><path d="M11 18h1" /><path d="M14 18h1" /><path d="M8 14h1" /><path d="M11 14h1" /><path d="M14 14h1" /><path d="M8 10h1" /><path d="M11 10h1" /><path d="M14 10h1" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_pdf_to_word">PDF'ten Word'e</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-red-500"><rect x="2" y="3" width="20" height="18" rx="2" /><path d="M6.5 3v18" /><path d="M14 8h-4" /><path d="M14 12h-4" /><path d="M10 16h1" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_pdf_to_ppt">PDF'ten PowerPoint'e</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-green-500"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" x2="9" y1="21" y2="9" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_pdf_to_excel">PDF'ten Excel'e</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-indigo-400"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_protect_pdf">PDF Şifrele</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-indigo-400"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 9.9-1" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_unlock_pdf">PDF Şifre Çöz</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-sky-400"><path d="m12 2-7 7h4v6h6v-6h4z" /><path d="M12 22v-6" /><path d="M4 16h16" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_watermark_pdf">PDF Filigran Ekle</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-sky-400"><path d="M15 2 9 8l3 3-10 10 3 3 10-10 3 3z" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_rotate_pdf">PDF Döndür</span></div>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-xl font-semibold mb-4 text-slate-300" data-translate-key="image_tools_title">Görüntü Araçları</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-yellow-400"><path d="M12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_image_converter">Görüntü Dönüştürücü</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-yellow-400"><path d="M12 3H3v18h18v-9"/><path d="M16 3h5v5"/><path d="M16 8.5L21 3.5"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_compress_image">Görüntü Sıkıştır</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-yellow-400"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10v4h10v-4"/><path d="M17 5H7l5 5z"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_resize_image">Görüntü Boyutlandır</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-blue-400"><path d="M4 7V5a2 2 0 0 1 2-2h2"/><path d="M16 3h2a2 2 0 0 1 2 2v2"/><path d="M4 17v2a2 2 0 0 0 2 2h2"/><path d="M16 21h2a2 2 0 0 0 2-2v-2"/><path d="M12 12v.01"/><path d="M8 12v.01"/><path d="M16 12v.01"/><path d="M12 8v.01"/><path d="M8 8v.01"/><path d="M16 8v.01"/><path d="M12 16v.01"/><path d="M8 16v.01"/><path d="M16 16v.01"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_ocr">Görüntüden Metin (OCR)</span></div>
+                    </div>
+                </div>
+                 <div>
+                    <h2 class="text-xl font-semibold mb-4 text-slate-300" data-translate-key="video_tools_title">Video Araçları</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-rose-400"><path d="m22 8-6 4 6 4V8Z"/><path d="M14 12H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12v10Z"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_video_converter">Video Dönüştürücü</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-rose-400"><path d="M12 3H3v18h18v-9"/><path d="M16 3h5v5"/><path d="M16 8.5L21 3.5"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_compress_video">Video Sıkıştır</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-rose-400"><path d="M15 3H9"/><path d="M15 21H9"/><path d="M3 9v6"/><path d="M21 9v6"/><path d="m8 12 8-5"/><path d="m8 12 8 5"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_trim_video">Video Kırp</span></div>
+                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-rose-400"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><path d="M3 9h18" /><path d="M3 15h18" /><path d="M9 3v18" /><path d="M15 3v18" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_merge_video">Video Birleştir</span></div>
+                    </div>
+                </div>
+                 <div>
+                    <h2 class="text-xl font-semibold mb-4 text-slate-300" data-translate-key="audio_tools_title">Ses Araçları</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-cyan-400"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_audio_converter">Ses Dönüştürücü</span></div>
+                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-cyan-400"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_change_volume">Sesi Ayarla</span></div>
+                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-cyan-400"><path d="M15 3H9"/><path d="M15 21H9"/><path d="M3 9v6"/><path d="M21 9v6"/><path d="m8 12 8-5"/><path d="m8 12 8 5"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_trim_audio">Ses Kırp</span></div>
+                    </div>
+                </div>
+                <div>
+                    <h2 class="text-xl font-semibold mb-4 text-slate-300" data-translate-key="archive_tools_title">Arşiv Araçları</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-lime-400"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_create_archive">Arşiv Oluştur (ZIP)</span></div>
+                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-lime-400"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_extract_archive">Arşiv Çıkart</span></div>
+                    </div>
+                </div>
+                 <div>
+                    <h2 class="text-xl font-semibold mb-4 text-slate-300" data-translate-key="other_tools_title">Diğer Araçlar</h2>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-teal-400"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><path d="M7 7h4v4H7z" /><path d="M13 7h4" /><path d="M13 11h4" /><path d="M7 15h2" /><path d="M13 15h.01" /><path d="M17 15h.01" /><path d="M17 11h.01" /><path d="M17 7h.01" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_qr_generator">QR Kod Oluşturucu</span></div>
+                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-teal-400"><path d="M16 20h4a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h4" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_hash_generator">Hash Oluşturucu</span></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // Dil çevirileri
+        const translations = {
+            tr: {
+                title: "Evrensel Araç Kutusu",
+                drop_zone_text: "Dosyaları buraya sürükleyip bırakın",
+                or: "veya",
+                select_file_btn: "Dosya Seç",
+                auto_delete_note: "Dosyalar 24 saat sonra otomatik olarak silinir.",
+                add_more_btn: "Daha Fazla Ekle",
+                convert_btn: "İşlemi Başlat",
+                download_all_zip: "Tümünü ZIP Olarak İndir",
+                pdf_tools_title: "PDF Araçları",
+                tool_merge_pdf: "PDF Birleştir",
+                tool_split_pdf: "PDF Ayır",
+                tool_compress_pdf: "PDF Sıkıştır",
+                tool_pdf_to_word: "PDF'ten Word'e",
+                tool_pdf_to_ppt: "PDF'ten PowerPoint'e",
+                tool_pdf_to_excel: "PDF'ten Excel'e",
+                tool_protect_pdf: "PDF Şifrele",
+                tool_unlock_pdf: "PDF Şifre Çöz",
+                tool_watermark_pdf: "PDF Filigran Ekle",
+                tool_rotate_pdf: "PDF Döndür",
+                image_tools_title: "Görüntü Araçları",
+                tool_image_converter: "Görüntü Dönüştürücü",
+                tool_compress_image: "Görüntü Sıkıştır",
+                tool_resize_image: "Görüntü Boyutlandır",
+                tool_ocr: "Görüntüden Metin (OCR)",
+                video_tools_title: "Video Araçları",
+                tool_video_converter: "Video Dönüştürücü",
+                tool_compress_video: "Video Sıkıştır",
+                tool_trim_video: "Video Kırp",
+                tool_merge_video: "Video Birleştir",
+                audio_tools_title: "Ses Araçları",
+                tool_audio_converter: "Ses Dönüştürücü",
+                tool_change_volume: "Sesi Ayarla",
+                tool_trim_audio: "Ses Kırp",
+                archive_tools_title: "Arşiv Araçları",
+                tool_create_archive: "Arşiv Oluştur (ZIP)",
+                tool_extract_archive: "Arşiv Çıkart",
+                other_tools_title: "Diğer Araçlar",
+                tool_qr_generator: "QR Kod Oluşturucu",
+                tool_hash_generator: "Hash Oluşturucu",
+                status_waiting: "Bekliyor",
+                status_converting: "Dönüştürülüyor...",
+                status_compressing: "Sıkıştırılıyor...",
+                status_resizing: "Yeniden Boyutlandırılıyor...",
+                status_completed: "Tamamlandı",
+                status_error: "Hata",
+                download: "İndir"
+            },
+            en: {
+                title: "Universal Toolbox",
+                drop_zone_text: "Drag and drop files here",
+                or: "or",
+                select_file_btn: "Select File",
+                auto_delete_note: "Files are automatically deleted after 24 hours.",
+                add_more_btn: "Add More",
+                convert_btn: "Start Process",
+                download_all_zip: "Download All as ZIP",
+                pdf_tools_title: "PDF Tools",
+                tool_merge_pdf: "Merge PDF",
+                tool_split_pdf: "Split PDF",
+                tool_compress_pdf: "Compress PDF",
+                tool_pdf_to_word: "PDF to Word",
+                tool_pdf_to_ppt: "PDF to PowerPoint",
+                tool_pdf_to_excel: "PDF to Excel",
+                tool_protect_pdf: "Protect PDF",
+                tool_unlock_pdf: "Unlock PDF",
+                tool_watermark_pdf: "Watermark PDF",
+                tool_rotate_pdf: "Rotate PDF",
+                image_tools_title: "Image Tools",
+                tool_image_converter: "Image Converter",
+                tool_compress_image: "Compress Image",
+                tool_resize_image: "Resize Image",
+                tool_ocr: "Image to Text (OCR)",
+                video_tools_title: "Video Tools",
+                tool_video_converter: "Video Converter",
+                tool_compress_video: "Compress Video",
+                tool_trim_video: "Trim Video",
+                tool_merge_video: "Merge Video",
+                audio_tools_title: "Audio Tools",
+                tool_audio_converter: "Audio Converter",
+                tool_change_volume: "Change Volume",
+                tool_trim_audio: "Trim Audio",
+                archive_tools_title: "Archive Tools",
+                tool_create_archive: "Create Archive (ZIP)",
+                tool_extract_archive: "Extract Archive",
+                other_tools_title: "Other Tools",
+                tool_qr_generator: "QR Code Generator",
+                tool_hash_generator: "Hash Generator",
+                status_waiting: "Waiting",
+                status_converting: "Converting...",
+                status_compressing: "Compressing...",
+                status_resizing: "Resizing...",
+                status_completed: "Completed",
+                status_error: "Error",
+                download: "Download"
+            }
+        };
+
+        // DOM Elementleri
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const fileSelectBtn = document.getElementById('file-select-btn');
+        const fileListSection = document.getElementById('file-list-section');
+        const fileListContainer = document.getElementById('file-list');
+        const convertBtn = document.getElementById('convert-btn');
+        const addMoreBtn = document.getElementById('add-more-btn');
+        const batchDownloadSection = document.getElementById('batch-download-section');
+        const langTrBtn = document.getElementById('lang-tr');
+        const langEnBtn = document.getElementById('lang-en');
+
+        let filesToProcess = [];
+        let currentLang = 'tr';
+
+        // --- DİL YÖNETİMİ ---
+        const setLanguage = (lang) => {
+            if (lang !== currentLang) {
+                currentLang = lang;
+                document.documentElement.lang = lang;
+                
+                const elements = document.querySelectorAll('[data-translate-key]');
+                elements.forEach(el => {
+                    const key = el.getAttribute('data-translate-key');
+                    if (translations[lang][key]) {
+                        el.innerText = translations[lang][key];
+                    }
+                });
+                
+                if(lang === 'tr') {
+                    langTrBtn.classList.remove('bg-slate-700', 'hover:bg-slate-600');
+                    langTrBtn.classList.add('bg-blue-600');
+                    langEnBtn.classList.add('bg-slate-700', 'hover:bg-slate-600');
+                    langEnBtn.classList.remove('bg-blue-600');
+                } else {
+                    langEnBtn.classList.remove('bg-slate-700', 'hover:bg-slate-600');
+                    langEnBtn.classList.add('bg-blue-600');
+                    langTrBtn.classList.add('bg-slate-700', 'hover:bg-slate-600');
+                    langTrBtn.classList.remove('bg-blue-600');
+                }
+                
+                renderFileList();
+            }
+        };
+
+        langTrBtn.addEventListener('click', () => setLanguage('tr'));
+        langEnBtn.addEventListener('click', () => setLanguage('en'));
+
+        // --- DOSYA YÜKLEME İŞLEMLERİ ---
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileSelectBtn.addEventListener('click', () => fileInput.click());
+        addMoreBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('drag-over'); });
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        const handleFiles = (newFiles) => {
+            for (const file of newFiles) {
+                if (!filesToProcess.some(f => f.file.name === file.name && f.file.size === file.size)) {
+                    filesToProcess.push({
+                        id: 'file_' + Math.random().toString(36).substr(2, 9),
+                        file: file,
+                        status: 'waiting',
+                        progress: 0,
+                        targetFormat: ''
+                    });
+                }
+            }
+            fileListSection.classList.remove('hidden');
+            dropZone.classList.add('hidden');
+            renderFileList();
+        };
+
+        // --- UI GÜNCELLEME ---
+        const renderFileList = () => {
+            fileListContainer.innerHTML = '';
+            filesToProcess.forEach((fileWrapper) => {
+                const fileItem = document.createElement('div');
+                fileItem.id = fileWrapper.id;
+                fileItem.className = 'bg-slate-800 p-4 rounded-lg flex flex-col sm:flex-row items-center gap-4 fade-in';
+                
+                const fileExtension = getFileExtension(fileWrapper.file.name);
+                const targetFormats = getTargetFormats(fileExtension);
+                
+                if (!fileWrapper.targetFormat && targetFormats.length > 0) {
+                     fileWrapper.targetFormat = targetFormats[0].value;
+                }
+
+                let optionsHTML = targetFormats.map(f => `<option value="${f.value}" ${fileWrapper.targetFormat === f.value ? 'selected' : ''}>${f.label}</option>`).join('');
+
+                fileItem.innerHTML = `
+                    <div class="flex-shrink-0">${getFileIcon(fileExtension)}</div>
+                    <div class="flex-grow text-center sm:text-left w-full sm:w-auto overflow-hidden">
+                        <p class="font-semibold text-slate-100 truncate" title="${fileWrapper.file.name}">${fileWrapper.file.name}</p>
+                        <p class="text-sm text-slate-400">${formatFileSize(fileWrapper.file.size)}</p>
+                    </div>
+                    <div class="flex items-center gap-4 w-full sm:w-auto">
+                        <select id="format-select-${fileWrapper.id}" class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
+                            ${optionsHTML}
+                        </select>
+                        <button class="remove-file-btn text-slate-500 hover:text-red-400 transition-colors flex-shrink-0" data-file-id="${fileWrapper.id}">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                    <div class="w-full sm:w-1/3">
+                        <div class="status-container flex items-center justify-center gap-2"></div>
+                    </div>
+                `;
+                
+                fileListContainer.appendChild(fileItem);
+                updateStatusUI(fileWrapper);
+
+                document.getElementById(`format-select-${fileWrapper.id}`).addEventListener('change', (e) => {
+                    fileWrapper.targetFormat = e.target.value;
+                });
+            });
+            
+            document.querySelectorAll('.remove-file-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => removeFile(e.currentTarget.getAttribute('data-file-id')));
+            });
+            
+            if (filesToProcess.length === 0) {
+                 fileListSection.classList.add('hidden');
+                 dropZone.classList.remove('hidden');
+                 batchDownloadSection.classList.add('hidden');
+            }
+        };
+
+        const updateStatusUI = (fileWrapper) => {
+            const fileItem = document.getElementById(fileWrapper.id);
+            if (!fileItem) return;
+
+            const statusContainer = fileItem.querySelector('.status-container');
+            const langKey = translations[currentLang];
+
+            switch(fileWrapper.status) {
+                case 'waiting':
+                    statusContainer.innerHTML = `<span class="text-slate-400 text-sm font-medium">${langKey.status_waiting}</span>`;
+                    break;
+                case 'converting': case 'compressing': case 'resizing':
+                     statusContainer.innerHTML = `
+                        <div class="w-full bg-slate-700 rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full progress-bar-inner" style="width: ${fileWrapper.progress}%"></div>
+                        </div>
+                        <span class="text-blue-300 text-sm font-medium">${fileWrapper.progress}%</span>`;
+                    break;
+                case 'completed':
+                    statusContainer.innerHTML = `
+                        <span class="text-green-400 font-semibold flex items-center gap-1">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            ${langKey.status_completed}
+                        </span>
+                        <button class="download-btn bg-green-500 text-white px-4 py-1 rounded-md text-sm font-semibold hover:bg-green-600">${langKey.download}</button>`;
+                    break;
+                case 'error':
+                    statusContainer.innerHTML = `<span class="text-red-400 font-semibold">${langKey.status_error}</span>`;
+                    break;
+            }
+        };
+
+        const removeFile = (fileId) => {
+            filesToProcess = filesToProcess.filter(f => f.id !== fileId);
+            renderFileList();
+        };
+
+        // --- YARDIMCI FONKSİYONLAR ---
+        const formatFileSize = (bytes) => {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        };
+        
+        const getFileExtension = (filename) => filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2).toLowerCase();
+        
+        const getFileIcon = (ext) => {
+            let iconClass = "text-slate-400";
+            let iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`;
+            switch (ext) {
+                case 'pdf': iconClass = "text-red-400"; break;
+                case 'docx': case 'doc': iconClass = "text-blue-400"; break;
+                case 'jpg': case 'jpeg': case 'png': case 'webp': case 'heic': iconClass = "text-yellow-400"; break;
+                case 'xlsx': case 'xls': case 'csv': iconClass = "text-green-400"; break;
+                case 'pptx': case 'ppt': iconClass = "text-orange-400"; break;
+                case 'mp4': case 'mov': case 'avi': case 'webm': iconClass = "text-rose-400"; iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>`; break;
+                case 'mp3': case 'wav': case 'm4a': iconClass = "text-cyan-400"; iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`; break;
+                case 'zip': case 'rar': case '7z': iconClass = "text-lime-400"; iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 12.2a2.4 2.4 0 0 0-3.3 0L12 18.3l-6.1-6.1a2.4 2.4 0 0 0-3.3 0v0a2.4 2.4 0 0 0 0 3.3l7.8 7.8c.9.9 2.4.9 3.3 0l7.8-7.8a2.4 2.4 0 0 0 0-3.3Z"></path><path d="M12 2v10"></path><path d="M10 2H8"></path><path d="M16 2h-2"></path></svg>`; break;
+            }
+            return `<div class="${iconClass}">${iconSvg}</div>`;
+        };
+        
+        const getTargetFormats = (ext) => {
+            const formats = {
+                'docx': [{value: 'pdf', label: 'PDF'}, {value: 'odt', label: 'ODT'}],
+                'pdf': [{value: 'docx', label: 'DOCX'}, {value: 'txt', label: 'TXT'}, {value: 'compress', label: 'PDF Sıkıştır'}],
+                'jpg': [{value: 'png', label: 'PNG'}, {value: 'webp', label: 'WEBP'}, {value: 'compress', label: 'JPG Sıkıştır'}, {value: 'resize', label: 'Yeniden Boyutlandır'}],
+                'jpeg': [{value: 'png', label: 'PNG'}, {value: 'webp', label: 'WEBP'}, {value: 'compress', label: 'JPG Sıkıştır'}, {value: 'resize', label: 'Yeniden Boyutlandır'}],
+                'png': [{value: 'jpg', label: 'JPG'}, {value: 'webp', label: 'WEBP'}],
+                'heic': [{value: 'jpg', label: 'JPG'}],
+                'pptx': [{value: 'pdf', label: 'PDF'}],
+                'xlsx': [{value: 'csv', label: 'CSV'}, {value: 'pdf', label: 'PDF'}],
+                'mp4': [{value: 'mp3', label: 'MP3 (Ses Al)'}, {value: 'avi', label: 'AVI'}, {value: 'webm', label: 'WEBM'}, {value: 'compress', label: 'Video Sıkıştır'}],
+                'mov': [{value: 'mp4', label: 'MP4'}, {value: 'webm', label: 'WEBM'}, {value: 'compress', label: 'Video Sıkıştır'}],
+                'mp3': [{value: 'wav', label: 'WAV'}, {value: 'm4a', label: 'M4A'}],
+                'wav': [{value: 'mp3', label: 'MP3'}],
+                'zip': [{value: 'unzip', label: 'Arşivi Çıkart'}],
+                'rar': [{value: 'unrar', label: 'Arşivi Çıkart'}],
+                '7z': [{value: 'un7z', label: 'Arşivi Çıkart'}],
+            };
+            return formats[ext] || [];
+        };
+
+        // --- DÖNÜŞTÜRME SİMÜLASYONU ---
+        convertBtn.addEventListener('click', () => {
+            document.querySelectorAll('select, .remove-file-btn').forEach(el => el.disabled = true);
+            convertBtn.disabled = true;
+            convertBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            addMoreBtn.disabled = true;
+            addMoreBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            
+            let completedCount = 0;
+
+            filesToProcess.forEach(fileWrapper => {
+                if (fileWrapper.status === 'waiting') {
+                    if (fileWrapper.targetFormat.includes('compress')) fileWrapper.status = 'compressing';
+                    else if (fileWrapper.targetFormat.includes('resize')) fileWrapper.status = 'resizing';
+                    else fileWrapper.status = 'converting';
+                    
+                    const interval = setInterval(() => {
+                        if (fileWrapper.progress < 100) {
+                            fileWrapper.progress += Math.floor(Math.random() * 10) + 5;
+                            if (fileWrapper.progress > 100) fileWrapper.progress = 100;
+                            updateStatusUI(fileWrapper);
+                        } else {
+                            clearInterval(interval);
+                            fileWrapper.status = 'completed';
+                            updateStatusUI(fileWrapper);
+                            
+                            completedCount++;
+                            if (completedCount === filesToProcess.length) {
+                                batchDownloadSection.classList.remove('hidden');
+                            }
+                        }
+                    }, 200);
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
+
