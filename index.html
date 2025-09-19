@@ -19,6 +19,11 @@
         .template-card:hover .overlay {
             opacity: 1;
         }
+        /* Make preview scrollable */
+        #preview-container {
+            height: 80vh; /* Adjust height as needed */
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800">
@@ -116,7 +121,7 @@
     </main>
 
     <!-- INTERACTIVE EDITOR -->
-    <section id="editor-section" class="hidden py-20 bg-slate-100">
+    <section id="editor-section" class="hidden py-10 md:py-20 bg-slate-100">
         <div class="container mx-auto px-6">
             <div class="text-center mb-12">
                 <h2 class="text-3xl md:text-4xl font-bold mb-2">Sitenizi Canlı Olarak Düzenleyin</h2>
@@ -124,7 +129,7 @@
             </div>
             <div class="flex flex-col lg:flex-row gap-8">
                 <!-- Left: Controls -->
-                <div class="w-full lg:w-1/3 bg-white p-8 rounded-xl shadow-lg">
+                <div class="w-full lg:w-1/3 bg-white p-8 rounded-xl shadow-lg self-start">
                     <h3 class="text-2xl font-bold mb-6">Site Ayarları</h3>
                     <div class="space-y-4">
                         <div>
@@ -139,18 +144,30 @@
                             <label for="dugun-tarihi" class="block text-sm font-medium text-slate-700">Düğün Tarihi</label>
                             <input type="text" id="dugun-tarihi" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500" placeholder="Örn: 25 Ekim 2025">
                         </div>
+                         <div>
+                            <label for="dugun-saati" class="block text-sm font-medium text-slate-700">Düğün Saati</label>
+                            <input type="text" id="dugun-saati" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500" placeholder="Örn: 19:30">
+                        </div>
+                         <div>
+                            <label for="dugun-mekani" class="block text-sm font-medium text-slate-700">Düğün Mekanı</label>
+                            <input type="text" id="dugun-mekani" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500" placeholder="Örn: La Vie Nouvelle">
+                        </div>
                         <div>
                             <label for="bizim-hikayemiz" class="block text-sm font-medium text-slate-700">Bizim Hikayemiz</label>
-                            <textarea id="bizim-hikayemiz" rows="6" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500" placeholder="Nasıl tanıştınız? Kısaca anlatın..."></textarea>
+                            <textarea id="bizim-hikayemiz" rows="4" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500" placeholder="Nasıl tanıştınız? Kısaca anlatın..."></textarea>
+                        </div>
+                         <div>
+                            <label for="ceyiz-listesi-linki" class="block text-sm font-medium text-slate-700">Çeyiz Listesi Linki</label>
+                            <input type="url" id="ceyiz-listesi-linki" class="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-pink-500 focus:border-pink-500" placeholder="https://... ">
                         </div>
                     </div>
                      <button id="publish-btn" class="mt-8 w-full bg-pink-600 text-white py-3 rounded-lg font-bold hover:bg-pink-700 transition-colors shadow-md">Kaydet ve Yayınla</button>
-                     <button id="back-to-main-btn" class="mt-4 w-full bg-slate-200 text-slate-700 py-3 rounded-lg font-bold hover:bg-slate-300 transition-colors">Geri Dön</button>
+                     <button id="back-to-main-btn" class="mt-4 w-full bg-slate-200 text-slate-700 py-3 rounded-lg font-bold hover:bg-slate-300 transition-colors">Ana Sayfaya Dön</button>
                 </div>
                 
                 <!-- Right: Live Preview -->
                 <div class="w-full lg:w-2/3">
-                    <div id="preview-container" class="bg-white rounded-xl shadow-2xl overflow-hidden h-full">
+                    <div id="preview-container" class="bg-white rounded-xl shadow-2xl overflow-hidden">
                         <!-- Preview content will be injected here by JS -->
                     </div>
                 </div>
@@ -221,47 +238,110 @@
             const gelinAdiInput = document.getElementById('gelin-adi');
             const damatAdiInput = document.getElementById('damat-adi');
             const dugunTarihiInput = document.getElementById('dugun-tarihi');
+            const dugunSaatiInput = document.getElementById('dugun-saati');
+            const dugunMekaniInput = document.getElementById('dugun-mekani');
             const bizimHikayemizInput = document.getElementById('bizim-hikayemiz');
+            const ceyizListesiLinkiInput = document.getElementById('ceyiz-listesi-linki');
             const backToMainBtn = document.getElementById('back-to-main-btn');
+
+            const fullPageTemplate = (content) => `
+                <div class="w-full h-full bg-white">
+                    ${content}
+                </div>`;
 
             const templateHTMLs = {
                 modern: `
-                    <div class="h-full flex flex-col p-4 md:p-8 bg-gradient-to-br from-indigo-50 to-slate-100 text-slate-800">
-                        <div class="text-center my-auto">
-                            <p class="text-xl tracking-widest text-indigo-600">EVLENİYORUZ</p>
-                            <h1 id="preview-names" class="font-serif text-5xl md:text-7xl my-4">
-                                <span id="preview-gelin-adi">Gelin Adı</span> & <span id="preview-damat-adi">Damat Adı</span>
-                            </h1>
-                            <p id="preview-tarih" class="text-2xl text-slate-600">Düğün Tarihi</p>
-                            <div class="w-24 h-px bg-indigo-200 mx-auto my-8"></div>
-                            <p id="preview-hikaye" class="text-slate-700 max-w-xl mx-auto italic">Bizim hikayemiz...</p>
+                    <!-- Hero -->
+                    <div class="h-[60vh] flex flex-col p-4 md:p-8 bg-gradient-to-br from-indigo-50 to-slate-100 text-slate-800 items-center justify-center text-center">
+                        <p class="text-xl tracking-widest text-indigo-600">EVLENİYORUZ</p>
+                        <h1 id="preview-names" class="font-serif text-5xl md:text-7xl my-4"><span id="preview-gelin-adi">Gelin Adı</span> & <span id="preview-damat-adi">Damat Adı</span></h1>
+                        <p id="preview-tarih" class="text-2xl text-slate-600">Düğün Tarihi</p>
+                    </div>
+                    <!-- Story -->
+                    <div class="py-16 text-center px-6 bg-white">
+                        <h2 class="font-serif text-4xl mb-4 text-slate-800">Bizim Hikayemiz</h2>
+                        <div class="w-24 h-px bg-indigo-200 mx-auto my-8"></div>
+                        <p id="preview-hikaye" class="text-slate-700 max-w-2xl mx-auto italic leading-relaxed">Bizim hikayemiz...</p>
+                    </div>
+                    <!-- Event -->
+                    <div class="py-16 bg-slate-50 text-center px-6">
+                        <h2 class="font-serif text-4xl mb-8 text-slate-800">Program</h2>
+                        <div class="inline-block bg-white p-8 rounded-lg shadow-md text-left">
+                            <h3 class="text-2xl font-bold text-indigo-600 mb-4">Düğün Töreni & Kutlama</h3>
+                            <p class="text-lg text-slate-600 flex items-center mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span id="preview-tarih-2">Düğün Tarihi</span></p>
+                            <p class="text-lg text-slate-600 flex items-center mb-2"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span id="preview-saat">Saat</span></p>
+                            <p class="text-lg text-slate-600 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mr-2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg><span id="preview-mekan">Mekan Adı</span></p>
+                            <a href="#" class="mt-4 inline-block bg-indigo-600 text-white px-5 py-2 rounded-md hover:bg-indigo-700 transition-colors text-sm">Haritada Gör</a>
                         </div>
+                    </div>
+                    <!-- Hediye Listesi -->
+                    <div class="py-16 text-center px-6 bg-white">
+                         <h2 class="font-serif text-4xl mb-4 text-slate-800">Hediye Listesi</h2>
+                         <p class="text-slate-600 max-w-xl mx-auto mb-8">Bizim için en güzel hediye varlığınız. Yine de bir hediye ile mutluluğumuza ortak olmak isterseniz, sizin için hazırladığımız listeye göz atabilirsiniz.</p>
+                         <a id="preview-ceyiz-linki" href="#" target="_blank" class="inline-block bg-pink-600 text-white px-8 py-3 rounded-full font-bold hover:bg-pink-700 transition-transform hover:scale-105">Listeyi Görüntüle</a>
                     </div>
                 `,
                 bohem: `
-                    <div class="h-full flex flex-col p-4 md:p-8 bg-amber-50 text-amber-900" style="background-image: url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg fill=%22none%22 fill-rule=%22evenodd%22%3E%3Cg fill=%22%23c2b280%22 fill-opacity=%220.1%22%3E%3Cpath d=%22M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');">
-                         <div class="text-center my-auto">
-                            <h1 id="preview-names" class="font-serif text-5xl md:text-7xl my-4 text-amber-800">
-                                <span id="preview-gelin-adi">Gelin Adı</span> & <span id="preview-damat-adi">Damat Adı</span>
-                            </h1>
-                             <p class="text-xl tracking-widest text-amber-700">AŞK DOLU BİR YOLCULUK</p>
-                            <p id="preview-tarih" class="text-2xl mt-4">Düğün Tarihi</p>
-                             <div class="w-24 h-px bg-amber-200 mx-auto my-8"></div>
-                            <p id="preview-hikaye" class="text-amber-800/80 max-w-xl mx-auto italic">Bizim hikayemiz...</p>
+                    <div class="h-[60vh] flex flex-col p-4 md:p-8 bg-amber-50 text-amber-900 items-center justify-center text-center" style="background-image: url('data:image/svg+xml,%3Csvg width=%2260%22 height=%2260%22 viewBox=%220 0 60 60%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cg fill=%22none%22 fill-rule=%22evenodd%22%3E%3Cg fill=%22%23c2b280%22 fill-opacity=%220.1%22%3E%3Cpath d=%22M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');">
+                        <h1 id="preview-names" class="font-serif text-5xl md:text-7xl my-4 text-amber-800"><span id="preview-gelin-adi">Gelin Adı</span> & <span id="preview-damat-adi">Damat Adı</span></h1>
+                        <p class="text-xl tracking-widest text-amber-700">AŞK DOLU BİR YOLCULUK</p>
+                        <p id="preview-tarih" class="text-2xl mt-4">Düğün Tarihi</p>
+                    </div>
+                     <!-- Story -->
+                    <div class="py-16 text-center px-6 bg-white">
+                        <h2 class="font-serif text-4xl mb-4 text-amber-800">Hikayemiz</h2>
+                        <div class="w-24 h-px bg-amber-200 mx-auto my-8"></div>
+                        <p id="preview-hikaye" class="text-amber-900/80 max-w-2xl mx-auto italic leading-relaxed">Bizim hikayemiz...</p>
+                    </div>
+                     <!-- Event -->
+                    <div class="py-16 bg-amber-50 text-center px-6">
+                        <h2 class="font-serif text-4xl mb-8 text-amber-800">Kutlama</h2>
+                        <div class="inline-block bg-white p-8 rounded-lg shadow-md text-center border-2 border-amber-200">
+                            <h3 class="text-2xl font-bold text-amber-700 mb-4">Büyük Gün</h3>
+                             <p id="preview-tarih-2" class="text-lg mt-2 text-slate-600">Düğün Tarihi</p>
+                            <p id="preview-saat" class="text-lg text-slate-600">Saat</p>
+                            <p id="preview-mekan" class="text-lg mt-2 font-semibold text-slate-700">Mekan Adı</p>
+                            <a href="#" class="mt-4 inline-block border border-amber-700 text-amber-700 px-5 py-2 rounded-full hover:bg-amber-700 hover:text-white transition-colors text-sm">Yol Tarifi</a>
                         </div>
+                    </div>
+                    <!-- Hediye Listesi -->
+                    <div class="py-16 text-center px-6 bg-white">
+                         <h2 class="font-serif text-4xl mb-4 text-amber-800">Hediyeniz Sevgimiz</h2>
+                         <p class="text-slate-600 max-w-xl mx-auto mb-8">Mutluluğumuzu paylaşmanız bizim için en değerli hediye. Dilerseniz, yeni yuvamız için hazırladığımız listeye bir göz atabilirsiniz.</p>
+                         <a id="preview-ceyiz-linki" href="#" target="_blank" class="inline-block bg-amber-800 text-white px-8 py-3 rounded-full font-bold hover:bg-amber-900 transition-transform hover:scale-105">Hediye Listemiz</a>
                     </div>
                 `,
                 rustik: `
-                    <div class="h-full flex flex-col p-4 md:p-8 bg-emerald-50 text-emerald-900" style="background-color: #f0fdf4;">
-                         <div class="text-center my-auto border-4 border-emerald-800 p-8 m-4">
-                             <p class="text-xl tracking-widest text-emerald-700">MUTLULUĞA EVET</p>
-                            <h1 id="preview-names" class="font-serif text-5xl md:text-7xl my-4">
-                                <span id="preview-gelin-adi">Gelin Adı</span> & <span id="preview-damat-adi">Damat Adı</span>
-                            </h1>
+                    <div class="h-[60vh] flex flex-col p-4 md:p-8 bg-emerald-50 text-emerald-900 items-center justify-center text-center" style="background-color: #f0fdf4;">
+                         <div class="text-center border-4 border-emerald-800 p-8 m-4 w-full md:w-auto">
+                            <p class="text-xl tracking-widest text-emerald-700">MUTLULUĞA EVET</p>
+                            <h1 id="preview-names" class="font-serif text-5xl md:text-7xl my-4"><span id="preview-gelin-adi">Gelin Adı</span> & <span id="preview-damat-adi">Damat Adı</span></h1>
                             <p id="preview-tarih" class="text-2xl text-emerald-600">Düğün Tarihi</p>
-                             <div class="w-24 h-px bg-emerald-200 mx-auto my-8"></div>
-                            <p id="preview-hikaye" class="text-emerald-700 max-w-xl mx-auto italic">Bizim hikayemiz...</p>
                         </div>
+                    </div>
+                     <!-- Story -->
+                    <div class="py-16 text-center px-6 bg-white">
+                        <h2 class="font-serif text-4xl mb-4 text-emerald-800">Bizim Masalımız</h2>
+                        <div class="w-24 h-px bg-emerald-200 mx-auto my-8"></div>
+                        <p id="preview-hikaye" class="text-emerald-900/80 max-w-2xl mx-auto italic leading-relaxed">Bizim hikayemiz...</p>
+                    </div>
+                     <!-- Event -->
+                    <div class="py-16 bg-emerald-50 text-center px-6">
+                        <h2 class="font-serif text-4xl mb-8 text-emerald-800">Tören Bilgileri</h2>
+                        <div class="inline-block bg-white p-8 rounded-lg shadow-md text-center">
+                            <img src="https://placehold.co/100x100/d1fae5/065f46?text=AG" class="mx-auto rounded-full mb-4" alt="Çift İkonu">
+                            <h3 class="text-2xl font-bold text-emerald-700 mb-4">Evleniyoruz!</h3>
+                             <p id="preview-tarih-2" class="text-lg mt-2 text-slate-600">Düğün Tarihi</p>
+                            <p id="preview-saat" class="text-lg text-slate-600">Saat</p>
+                            <p id="preview-mekan" class="text-lg mt-2 font-semibold text-slate-700">Mekan Adı</p>
+                            <a href="#" class="mt-4 inline-block bg-emerald-700 text-white px-5 py-2 rounded-md hover:bg-emerald-800 transition-colors text-sm">Konumu Gör</a>
+                        </div>
+                    </div>
+                    <!-- Hediye Listesi -->
+                    <div class="py-16 text-center px-6 bg-white">
+                         <h2 class="font-serif text-4xl mb-4 text-emerald-800">Mutluluğa Destek</h2>
+                         <p class="text-slate-600 max-w-xl mx-auto mb-8">Bu özel günümüzde yanımızda olmanız en büyük armağan. Evimizi kurarken bize destek olmak isterseniz listemize bakabilirsiniz.</p>
+                         <a id="preview-ceyiz-linki" href="#" target="_blank" class="inline-block bg-emerald-800 text-white px-8 py-3 rounded-full font-bold hover:bg-emerald-900 transition-transform hover:scale-105">Çeyiz Listemiz</a>
                     </div>
                 `
             };
@@ -270,12 +350,20 @@
                 const gelinAdi = document.getElementById('preview-gelin-adi');
                 const damatAdi = document.getElementById('preview-damat-adi');
                 const tarih = document.getElementById('preview-tarih');
+                const tarih2 = document.getElementById('preview-tarih-2');
+                const saat = document.getElementById('preview-saat');
+                const mekan = document.getElementById('preview-mekan');
                 const hikaye = document.getElementById('preview-hikaye');
+                const ceyizLinki = document.getElementById('preview-ceyiz-linki');
 
                 if(gelinAdi) gelinAdi.textContent = gelinAdiInput.value || 'Gelin Adı';
                 if(damatAdi) damatAdi.textContent = damatAdiInput.value || 'Damat Adı';
                 if(tarih) tarih.textContent = dugunTarihiInput.value || 'Düğün Tarihi';
+                if(tarih2) tarih2.textContent = dugunTarihiInput.value || 'Düğün Tarihi';
+                if(saat) saat.textContent = dugunSaatiInput.value || 'Saat';
+                if(mekan) mekan.textContent = dugunMekaniInput.value || 'Mekan Adı';
                 if(hikaye) hikaye.textContent = bizimHikayemizInput.value || 'Bizim hikayemiz...';
+                if(ceyizLinki) ceyizLinki.href = ceyizListesiLinkiInput.value || '#';
             }
 
             function showEditor(templateName) {
@@ -283,7 +371,7 @@
                 mainContent2.classList.add('hidden');
                 editorSection.classList.remove('hidden');
                 header.classList.add('hidden'); // Hide header in editor mode
-                previewContainer.innerHTML = templateHTMLs[templateName];
+                previewContainer.innerHTML = fullPageTemplate(templateHTMLs[templateName]);
                 updatePreview(); // Initial update
                 window.scrollTo(0, 0);
             }
@@ -305,7 +393,7 @@
             startNowBtn.addEventListener('click', (e) => {
                  e.preventDefault();
                  showEditor('modern'); // Default to modern template
-                 editorSection.scrollIntoView();
+                 editorSection.scrollIntoView({ behavior: 'smooth' });
             });
 
             backToMainBtn.addEventListener('click', showMainContent);
@@ -313,9 +401,13 @@
             gelinAdiInput.addEventListener('input', updatePreview);
             damatAdiInput.addEventListener('input', updatePreview);
             dugunTarihiInput.addEventListener('input', updatePreview);
+            dugunSaatiInput.addEventListener('input', updatePreview);
+            dugunMekaniInput.addEventListener('input', updatePreview);
             bizimHikayemizInput.addEventListener('input', updatePreview);
+            ceyizListesiLinkiInput.addEventListener('input', updatePreview);
         });
     </script>
 
 </body>
 </html>
+
