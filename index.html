@@ -32,7 +32,7 @@
             --color-border: #cbd5e1;
             --color-accent-primary: #2563eb;
             --color-accent-primary-hover: #1d4ed8;
-            --color-accent-primary-faded: #dbeafe;
+            --color-accent-primary-faded: #eff6ff;
             --color-accent-secondary: #4f46e5;
             --color-accent-secondary-hover: #4338ca;
             --color-success: #16a34a;
@@ -57,7 +57,7 @@
             --color-border: #475569;
             --color-accent-primary: #3b82f6;
             --color-accent-primary-hover: #60a5fa;
-            --color-accent-primary-faded: #1e293b;
+            --color-accent-primary-faded: #1e3a8a;
             --color-accent-secondary: #6366f1;
             --color-accent-secondary-hover: #818cf8;
             --color-success: #22c55e;
@@ -127,32 +127,33 @@
             color: var(--color-accent-primary) !important;
         }
         .student-card.starred {
-            box-shadow: 0 0 0 2px var(--color-star);
+            box-shadow: 0 0 0 3px var(--color-star);
         }
 
-        ::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #555; }
-        .modal-content { max-height: 80vh; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--color-bg-hover); }
+        ::-webkit-scrollbar-thumb { background: var(--color-text-secondary); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--color-text-primary); }
+        .modal-content { max-height: 85vh; }
     </style>
 </head>
 <body class="bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-colors duration-300">
 
-    <div class="container mx-auto p-4 md:p-8 relative">
-        <header class="text-center mb-8">
-            <h1 class="text-3xl md:text-4xl font-bold text-[var(--color-text-title)]">Öğrenci Değerlendirme Sistemi</h1>
-            <p class="text-[var(--color-text-secondary)] mt-2">Sınıflarınızı oluşturun, öğrencilerinizi yönetin.</p>
+    <div class="container mx-auto p-3 sm:p-4 md:p-8 relative">
+        <header class="text-center mb-8 flex flex-col items-center gap-3">
+             <svg class="w-12 h-12 text-[var(--color-accent-secondary)]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4 11.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H4.75a.75.75 0 01-.75-.75zm0-4a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H4.75a.75.75 0 01-.75-.75zm0 8a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H4.75a.75.75 0 01-.75-.75z"></path></svg>
+            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-[var(--color-text-title)]">Öğrenci Değerlendirme Sistemi</h1>
+            <p class="text-[var(--color-text-secondary)] mt-0 sm:mt-1">Sınıflarınızı oluşturun, öğrencilerinizi yönetin.</p>
         </header>
 
         <!-- Ayarlar Butonları -->
-        <div class="absolute top-0 right-4 md:right-8 flex items-center gap-2 z-10">
-            <!-- Font Seçici -->
+        <div class="absolute top-2 right-2 sm:top-4 md:right-8 flex items-center gap-2 z-10">
             <div class="relative" id="font-selector-container">
                 <button id="font-selector-btn" class="w-10 h-10 bg-[var(--color-bg-secondary)] rounded-full shadow-md flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-accent-primary)] transition" title="Yazı Tipini Değiştir">
                     <i class="fas fa-font"></i>
                 </button>
                 <div id="font-options" class="absolute right-0 mt-2 w-48 bg-[var(--color-bg-secondary)] rounded-lg shadow-xl p-2 z-20 hidden ring-1 ring-black/5"></div>
             </div>
-            <!-- Tema Seçici -->
             <div class="relative" id="theme-selector-container">
                 <button id="theme-selector-btn" class="w-10 h-10 bg-[var(--color-bg-secondary)] rounded-full shadow-md flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-accent-primary)] transition" title="Temayı Değiştir">
                     <i class="fas fa-palette"></i>
@@ -162,22 +163,21 @@
         </div>
 
         <!-- Sınıf ve Veri Yönetimi -->
-        <div class="bg-[var(--color-bg-secondary)] p-6 rounded-xl shadow-md mb-8 max-w-4xl mx-auto">
-            <h2 class="text-xl font-semibold mb-4 text-[var(--color-text-title)]">Sınıf Yönetimi</h2>
+        <div class="bg-[var(--color-bg-secondary)] p-6 rounded-2xl shadow-lg mb-8 max-w-4xl mx-auto">
+            <h2 class="text-xl font-semibold mb-4 text-[var(--color-text-title)] flex items-center gap-2"><i class="fas fa-university text-[var(--color-accent-secondary)]"></i>Sınıf Yönetimi</h2>
             <form id="add-class-form" class="flex flex-col sm:flex-row gap-4 mb-4">
-                <input type="text" id="class-name-input" placeholder="Yeni Sınıf Adı (örn: 8-A)" class="flex-grow p-3 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-secondary)] focus:outline-none transition" required>
-                <button type="submit" class="bg-[var(--color-accent-secondary)] text-[var(--color-text-inverted)] font-semibold py-3 px-6 rounded-lg hover:bg-[var(--color-accent-secondary-hover)] transition-all duration-300 shadow-sm flex items-center justify-center gap-2">
+                <input type="text" id="class-name-input" placeholder="Yeni Sınıf Adı (örn: 8-A)" class="flex-grow p-3 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-secondary)] focus:outline-none transition-all duration-300" required>
+                <button type="submit" class="bg-[var(--color-accent-secondary)] text-[var(--color-text-inverted)] font-semibold py-3 px-6 rounded-lg hover:bg-[var(--color-accent-secondary-hover)] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-2">
                     <i class="fas fa-plus"></i>
                     <span>Sınıf Oluştur</span>
                 </button>
             </form>
             <div id="class-tabs-container" class="flex flex-wrap gap-2 border-t border-[var(--color-border)] pt-4"></div>
-             <!-- Veri Yönetimi -->
             <div class="border-t border-[var(--color-border)] mt-4 pt-4 flex flex-col sm:flex-row gap-2 text-sm">
-                <button id="export-data-btn" class="flex-1 bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] font-semibold py-2 px-4 rounded-lg hover:brightness-95 transition flex items-center justify-center gap-2">
+                <button id="export-data-btn" class="flex-1 bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] font-semibold py-2 px-4 rounded-lg hover:brightness-95 transition-all duration-300 flex items-center justify-center gap-2">
                     <i class="fas fa-download"></i> Verileri Dışa Aktar (Yedekle)
                 </button>
-                <button id="import-data-btn" class="flex-1 bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] font-semibold py-2 px-4 rounded-lg hover:brightness-95 transition flex items-center justify-center gap-2">
+                <button id="import-data-btn" class="flex-1 bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] font-semibold py-2 px-4 rounded-lg hover:brightness-95 transition-all duration-300 flex items-center justify-center gap-2">
                     <i class="fas fa-upload"></i> Verileri İçe Aktar (Geri Yükle)
                 </button>
                 <input type="file" id="import-file-input" class="hidden" accept=".json">
@@ -186,91 +186,89 @@
 
         <!-- Öğrenci Bölümü -->
         <div id="student-section" class="hidden">
-            <!-- İstatistik Paneli -->
             <div id="stats-dashboard" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 max-w-4xl mx-auto"></div>
-        
-            <!-- Yeni Öğrenci Ekleme ve Arama -->
-            <div class="bg-[var(--color-bg-secondary)] p-6 rounded-xl shadow-md mb-8 max-w-4xl mx-auto">
-                <h2 class="text-xl font-semibold mb-4 text-[var(--color-text-title)]">Öğrenci Yönetimi (<span id="active-class-name-form" class="font-bold text-[var(--color-accent-primary)]"></span>)</h2>
+            <div class="bg-[var(--color-bg-secondary)] p-6 rounded-2xl shadow-lg mb-8 max-w-4xl mx-auto">
+                <h2 class="text-xl font-semibold mb-4 text-[var(--color-text-title)] flex items-center gap-2"><i class="fas fa-users text-[var(--color-accent-primary)]"></i>Öğrenci Yönetimi (<span id="active-class-name-form" class="font-bold"></span>)</h2>
                 <form id="add-student-form" class="flex flex-col sm:flex-row gap-4 mb-4">
-                    <input type="text" id="student-name-input" placeholder="Öğrenci Adı ve Soyadı" class="flex-grow p-3 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition" required>
-                    <button type="submit" class="bg-[var(--color-accent-primary)] text-[var(--color-text-inverted)] font-semibold py-3 px-6 rounded-lg hover:bg-[var(--color-accent-primary-hover)] transition-all duration-300 shadow-sm flex items-center justify-center gap-2">
+                    <input type="text" id="student-name-input" placeholder="Öğrenci Adı ve Soyadı" class="flex-grow p-3 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition-all duration-300" required>
+                    <button type="submit" class="bg-[var(--color-accent-primary)] text-[var(--color-text-inverted)] font-semibold py-3 px-6 rounded-lg hover:bg-[var(--color-accent-primary-hover)] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1 flex items-center justify-center gap-2">
                         <i class="fas fa-user-plus"></i>
                         <span>Öğrenci Ekle</span>
                     </button>
                 </form>
                 <div class="border-t border-[var(--color-border)] pt-4 flex flex-col sm:flex-row gap-4 items-center">
                     <div class="relative flex-grow w-full">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"></i>
-                        <input type="text" id="search-student-input" placeholder="Öğrenci Ara..." class="w-full p-2 pl-10 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition">
+                        <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"></i>
+                        <input type="text" id="search-student-input" placeholder="Öğrenci Ara..." class="w-full p-3 pl-12 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition-all duration-300">
                     </div>
                     <div class="relative w-full sm:w-auto">
-                        <select id="sort-students-select" class="w-full appearance-none p-2 pr-8 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition">
+                        <select id="sort-students-select" class="w-full appearance-none p-3 pr-10 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition-all duration-300">
                             <option value="name-asc">İsme Göre (A-Z)</option>
                             <option value="name-desc">İsme Göre (Z-A)</option>
                             <option value="plus-desc">En Çok Artı</option>
                             <option value="minus-desc">En Çok Eksi</option>
                         </select>
-                         <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] pointer-events-none"></i>
+                         <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] pointer-events-none"></i>
                     </div>
                 </div>
             </div>
-
-            <!-- Öğrenci Listesi -->
             <div id="student-list-container">
-                <div id="student-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+                <div id="student-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"></div>
             </div>
         </div>
-         <div id="empty-state-no-class" class="text-center py-10 px-6 bg-[var(--color-bg-secondary)] rounded-xl shadow-md max-w-2xl mx-auto hidden">
-            <svg class="mx-auto h-16 w-16 text-[var(--color-text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-            <h3 class="mt-4 text-xl font-semibold text-[var(--color-text-title)]">Başlamak için bir sınıf oluşturun</h3>
-            <p class="mt-2 text-sm text-[var(--color-text-secondary)]">Yukarıdaki "Sınıf Yönetimi" bölümünden ilk sınıfınızı ekleyebilirsiniz.</p>
+         <div id="empty-state-no-class" class="text-center py-16 px-6 bg-[var(--color-bg-secondary)] rounded-2xl shadow-xl max-w-2xl mx-auto hidden">
+            <img src="https://placehold.co/128x128/E2E8F0/64748B?text=📚" alt="Kitaplar ikonu" class="mx-auto h-32 w-32 rounded-full mb-6 ring-4 ring-[var(--color-bg-hover)]">
+            <h3 class="mt-4 text-2xl font-bold text-[var(--color-text-title)]">Henüz Sınıf Yok</h3>
+            <p class="mt-2 text-md text-[var(--color-text-secondary)] max-w-md mx-auto">Görünüşe göre henüz bir sınıf oluşturmadınız. Başlamak için aşağıdaki butonu kullanın.</p>
+            <button id="add-first-class-btn" class="mt-6 bg-[var(--color-accent-secondary)] text-[var(--color-text-inverted)] font-semibold py-3 px-8 rounded-lg hover:bg-[var(--color-accent-secondary-hover)] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                <i class="fas fa-plus mr-2"></i>İlk Sınıfını Oluştur
+            </button>
         </div>
     </div>
 
     <!-- Modal ve Bildirimler -->
-    <div id="student-modal" class="fixed inset-0 bg-black/60 items-center justify-center hidden z-50 p-4">
+    <div id="student-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-[var(--color-bg-secondary)] rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 scale-95 opacity-0 modal-content overflow-y-auto">
             <div class="p-6 md:p-8">
                 <div class="flex justify-between items-start mb-6">
-                    <h2 class="text-2xl font-bold text-[var(--color-text-title)]" id="modal-student-name"></h2>
+                    <h2 class="text-xl sm:text-2xl font-bold text-[var(--color-text-title)]" id="modal-student-name"></h2>
                     <button id="close-modal-btn" class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-2xl leading-none">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-[var(--color-success-faded)] p-4 rounded-lg">
-                        <h3 class="font-semibold text-lg text-[var(--color-success)] mb-3">Artıları (<span id="plus-count">0</span>)</h3>
-                        <ul id="plus-list" class="space-y-2 text-sm max-h-40 overflow-y-auto pr-2"></ul>
-                        <button id="add-plus-btn" class="mt-4 w-full bg-[var(--color-success)] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[var(--color-success-hover)] transition flex items-center justify-center gap-2">
+                    <div class="bg-[var(--color-bg-hover)] p-4 rounded-xl">
+                        <h3 class="font-semibold text-lg text-[var(--color-success)] mb-3 flex items-center gap-2"><i class="fas fa-plus-circle"></i>Artıları (<span id="plus-count">0</span>)</h3>
+                        <ul id="plus-list" class="space-y-2 text-sm max-h-48 overflow-y-auto pr-2"></ul>
+                        <button id="add-plus-btn" class="mt-4 w-full bg-[var(--color-success)] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[var(--color-success-hover)] transition-all duration-300 flex items-center justify-center gap-2 transform hover:-translate-y-0.5">
                             <i class="fas fa-plus"></i> <span>Artı Ekle</span>
                         </button>
                     </div>
-                    <div class="bg-[var(--color-danger-faded)] p-4 rounded-lg">
-                        <h3 class="font-semibold text-lg text-[var(--color-danger)] mb-3">Eksileri (<span id="minus-count">0</span>)</h3>
-                        <ul id="minus-list" class="space-y-2 text-sm max-h-40 overflow-y-auto pr-2"></ul>
-                        <button id="add-minus-btn" class="mt-4 w-full bg-[var(--color-danger)] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[var(--color-danger-hover)] transition flex items-center justify-center gap-2">
+                    <div class="bg-[var(--color-bg-hover)] p-4 rounded-xl">
+                        <h3 class="font-semibold text-lg text-[var(--color-danger)] mb-3 flex items-center gap-2"><i class="fas fa-minus-circle"></i>Eksileri (<span id="minus-count">0</span>)</h3>
+                        <ul id="minus-list" class="space-y-2 text-sm max-h-48 overflow-y-auto pr-2"></ul>
+                        <button id="add-minus-btn" class="mt-4 w-full bg-[var(--color-danger)] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[var(--color-danger-hover)] transition-all duration-300 flex items-center justify-center gap-2 transform hover:-translate-y-0.5">
                             <i class="fas fa-minus"></i> <span>Eksi Ekle</span>
                         </button>
                     </div>
                 </div>
                 <div class="mt-6">
-                    <h3 class="font-semibold text-lg text-[var(--color-text-title)] mb-3">Öğrenci Hakkında Notlar</h3>
-                    <textarea id="notes-textarea" class="w-full p-3 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg h-28 focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition" placeholder="Bu alana öğrenciyle ilgili notlarınızı ekleyebilirsiniz..."></textarea>
-                    <button id="save-notes-btn" class="mt-3 w-full bg-[var(--color-neutral)] text-[var(--color-text-inverted)] font-semibold py-2 px-4 rounded-lg hover:bg-[var(--color-neutral-hover)] transition flex items-center justify-center gap-2">
+                    <h3 class="font-semibold text-lg text-[var(--color-text-title)] mb-3 flex items-center gap-2"><i class="fas fa-sticky-note"></i>Öğrenci Hakkında Notlar</h3>
+                    <textarea id="notes-textarea" class="w-full p-3 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg h-28 focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition-all duration-300" placeholder="Bu alana öğrenciyle ilgili notlarınızı ekleyebilirsiniz..."></textarea>
+                    <button id="save-notes-btn" class="mt-3 w-full bg-[var(--color-neutral)] text-[var(--color-text-inverted)] font-semibold py-2 px-4 rounded-lg hover:bg-[var(--color-neutral-hover)] transition-all duration-300 flex items-center justify-center gap-2 transform hover:-translate-y-0.5">
                         <i class="fas fa-save"></i> <span>Notları Kaydet</span>
                     </button>
                 </div>
             </div>
             <div class="bg-[var(--color-bg-hover)] p-4 md:p-6 mt-4 rounded-b-2xl">
-                 <button id="delete-student-btn" class="w-full bg-transparent border border-[var(--color-danger)] text-[var(--color-danger)] font-semibold py-2 px-4 rounded-lg hover:bg-[var(--color-danger)] hover:text-white transition flex items-center justify-center gap-2">
+                 <button id="delete-student-btn" class="w-full bg-transparent border-2 border-[var(--color-danger)] text-[var(--color-danger)] font-semibold py-2 px-4 rounded-lg hover:bg-[var(--color-danger)] hover:text-white transition-all duration-300 flex items-center justify-center gap-2">
                     <i class="fas fa-trash-alt"></i> <span>Bu Öğrenciyi Sil</span>
                 </button>
             </div>
         </div>
     </div>
     
-    <div id="prompt-modal" class="fixed inset-0 bg-black/60 items-center justify-center hidden z-50 p-4">
+    <div id="prompt-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div id="prompt-modal-content" class="bg-[var(--color-bg-secondary)] rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all duration-300 scale-95 opacity-0">
             <h3 id="prompt-modal-title" class="text-lg font-semibold mb-2 text-[var(--color-text-title)]"></h3>
             <p id="prompt-modal-text" class="text-[var(--color-text-secondary)] mb-4 text-sm"></p>
@@ -288,7 +286,6 @@
         document.addEventListener('DOMContentLoaded', () => {
             const getEl = (id) => document.getElementById(id);
 
-            // Ana Elementler
             const addClassForm = getEl('add-class-form');
             const classNameInput = getEl('class-name-input');
             const classTabsContainer = getEl('class-tabs-container');
@@ -302,11 +299,11 @@
             const statsDashboard = getEl('stats-dashboard');
             const toast = getEl('toast');
             const emptyStateNoClass = getEl('empty-state-no-class');
+            const addFirstClassBtn = getEl('add-first-class-btn');
             const exportDataBtn = getEl('export-data-btn');
             const importDataBtn = getEl('import-data-btn');
             const importFileInput = getEl('import-file-input');
 
-            // Tema ve Font Elementleri
             const themeSelectorContainer = getEl('theme-selector-container');
             const themeSelectorBtn = getEl('theme-selector-btn');
             const themeOptions = getEl('theme-options');
@@ -317,7 +314,6 @@
             const themes = [ { id: 'light', name: 'Varsayılan' }, { id: 'dark', name: 'Gece' }, { id: 'forest', name: 'Orman' }, { id: 'sunset', name: 'Gün Batımı' } ];
             const fonts = [ { id: 'inter', name: 'Inter' }, { id: 'roboto', name: 'Roboto' }, { id: 'lato', name: 'Lato' }, { id: 'poppins', name: 'Poppins' }, { id: 'playfair', name: 'Playfair Display' }, { id: 'montserrat', name: 'Cocogoose (Benzeri)' } ];
 
-            // Öğrenci Detay Modal Elementleri
             const studentModal = getEl('student-modal');
             const studentModalContent = studentModal.querySelector('.modal-content');
             const closeModalBtn = getEl('close-modal-btn');
@@ -332,7 +328,6 @@
             const saveNotesBtn = getEl('save-notes-btn');
             const deleteStudentBtn = getEl('delete-student-btn');
 
-            // Özel Prompt/Confirm Modal Elementleri
             const promptModal = getEl('prompt-modal');
             const promptModalContent = promptModal.querySelector('#prompt-modal-content');
             const promptModalTitle = getEl('prompt-modal-title');
@@ -345,7 +340,6 @@
             let appData = { classes: [], students: {}, activeClass: null };
             let currentStudentId = null;
 
-            // --- Tema ve Font Yönetimi ---
             function applyTheme(themeId) { document.documentElement.setAttribute('data-theme', themeId); localStorage.setItem('appTheme', themeId); }
             function applyFont(fontId) { document.documentElement.setAttribute('data-font', fontId); localStorage.setItem('appFont', fontId); }
             function renderOptions(container, items, callback) {
@@ -362,7 +356,6 @@
             function loadTheme() { applyTheme(localStorage.getItem('appTheme') || 'light'); }
             function loadFont() { applyFont(localStorage.getItem('appFont') || 'inter'); }
             
-            // --- Veri Yönetimi ---
             function loadData() {
                 const storedData = localStorage.getItem('studentAppData');
                 if (storedData) appData = JSON.parse(storedData);
@@ -379,7 +372,6 @@
                 setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-10'); }, 3000);
             }
 
-            // --- Arayüz Güncelleme ---
             function updateUI() {
                 renderClasses();
                 renderDashboard();
@@ -393,7 +385,7 @@
                 classTabsContainer.innerHTML = '';
                 appData.classes.forEach(className => {
                     const tab = document.createElement('div');
-                    tab.className = `flex items-center gap-2 border-2 rounded-full px-4 py-2 text-sm font-semibold cursor-pointer transition ${className === appData.activeClass ? 'tab-active' : 'text-[var(--color-text-secondary)] border-transparent hover:bg-[var(--color-bg-hover)]'}`;
+                    tab.className = `flex items-center gap-2 border-2 rounded-full px-4 py-2 text-sm font-semibold cursor-pointer transition-all duration-300 ${className === appData.activeClass ? 'tab-active' : 'text-[var(--color-text-secondary)] border-transparent hover:bg-[var(--color-bg-hover)]'}`;
                     tab.innerHTML = `<span>${className}</span><button data-class="${className}" class="delete-class-btn text-slate-400 hover:text-[var(--color-danger)] text-xs">&times;</button>`;
                     
                     tab.addEventListener('click', (e) => { if (!e.target.classList.contains('delete-class-btn')) { appData.activeClass = className; saveData(); updateUI(); } });
@@ -415,9 +407,9 @@
                 const totalMinuses = students.reduce((acc, s) => acc + s.minuses.length, 0);
 
                 statsDashboard.innerHTML = `
-                    <div class="bg-[var(--color-bg-secondary)] p-4 rounded-lg shadow-sm flex items-center gap-4"><div class="w-10 h-10 flex items-center justify-center bg-[var(--color-accent-primary-faded)] text-[var(--color-accent-primary)] rounded-full"><i class="fas fa-users"></i></div><div><div class="text-sm text-[var(--color-text-secondary)]">Toplam Öğrenci</div><div class="text-2xl font-bold text-[var(--color-text-title)]">${totalStudents}</div></div></div>
-                    <div class="bg-[var(--color-bg-secondary)] p-4 rounded-lg shadow-sm flex items-center gap-4"><div class="w-10 h-10 flex items-center justify-center bg-[var(--color-success-faded)] text-[var(--color-success)] rounded-full"><i class="fas fa-plus-circle"></i></div><div><div class="text-sm text-[var(--color-text-secondary)]">Toplam Artı</div><div class="text-2xl font-bold text-[var(--color-text-title)]">${totalPluses}</div></div></div>
-                    <div class="bg-[var(--color-bg-secondary)] p-4 rounded-lg shadow-sm flex items-center gap-4"><div class="w-10 h-10 flex items-center justify-center bg-[var(--color-danger-faded)] text-[var(--color-danger)] rounded-full"><i class="fas fa-minus-circle"></i></div><div><div class="text-sm text-[var(--color-text-secondary)]">Toplam Eksi</div><div class="text-2xl font-bold text-[var(--color-text-title)]">${totalMinuses}</div></div></div>
+                    <div class="bg-[var(--color-bg-secondary)] p-5 rounded-xl shadow-lg flex items-center gap-4 transition-transform hover:scale-105"><div class="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-[var(--color-accent-primary)] to-[var(--color-accent-secondary)] text-white rounded-xl shadow-md"><i class="fas fa-users text-xl"></i></div><div><div class="text-sm text-[var(--color-text-secondary)]">Toplam Öğrenci</div><div class="text-2xl font-bold text-[var(--color-text-title)]">${totalStudents}</div></div></div>
+                    <div class="bg-[var(--color-bg-secondary)] p-5 rounded-xl shadow-lg flex items-center gap-4 transition-transform hover:scale-105"><div class="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-[var(--color-success)] to-green-400 text-white rounded-xl shadow-md"><i class="fas fa-plus-circle text-xl"></i></div><div><div class="text-sm text-[var(--color-text-secondary)]">Toplam Artı</div><div class="text-2xl font-bold text-[var(--color-text-title)]">${totalPluses}</div></div></div>
+                    <div class="bg-[var(--color-bg-secondary)] p-5 rounded-xl shadow-lg flex items-center gap-4 transition-transform hover:scale-105"><div class="w-12 h-12 flex items-center justify-center bg-gradient-to-br from-[var(--color-danger)] to-red-400 text-white rounded-xl shadow-md"><i class="fas fa-minus-circle text-xl"></i></div><div><div class="text-sm text-[var(--color-text-secondary)]">Toplam Eksi</div><div class="text-2xl font-bold text-[var(--color-text-title)]">${totalMinuses}</div></div></div>
                 `;
             }
 
@@ -428,13 +420,11 @@
                 activeClassNameForm.textContent = appData.activeClass;
                 let students = appData.students[appData.activeClass] || [];
 
-                // Filter
                 const searchTerm = searchStudentInput.value.toLowerCase();
                 if (searchTerm) {
                     students = students.filter(s => s.name.toLowerCase().includes(searchTerm));
                 }
                 
-                // Sort
                 const sortValue = sortStudentsSelect.value;
                 students.sort((a, b) => {
                     switch (sortValue) {
@@ -447,19 +437,23 @@
                 });
 
                 if (students.length === 0) {
-                    studentList.innerHTML = `<div class="text-center py-10 px-6 bg-[var(--color-bg-secondary)] rounded-xl shadow-sm col-span-full"><svg class="mx-auto h-12 w-12 text-[var(--color-text-secondary)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.166 1.318m5.754-7.728A4.486 4.486 0 0012.016 7a4.486 4.486 0 00-3.166 1.318m5.754 0a4.488 4.488 0 013.166 1.318m-5.754 0a4.488 4.488 0 00-3.166-1.318m0 0A4.486 4.486 0 006.834 15a4.486 4.486 0 00-3.166 1.318m0 0A4.488 4.488 0 01.5 12.5a4.488 4.488 0 013.166-1.318m0 0A4.486 4.486 0 018.166 7a4.486 4.486 0 013.166 1.318m0 0a4.488 4.488 0 013.166-1.318m-3.166 0a4.488 4.488 0 003.166 1.318m0 0A4.486 4.486 0 0021.166 15a4.486 4.486 0 00-3.166-1.318m0 0a4.488 4.488 0 00-3.166-1.318" /></svg><h3 class="mt-2 text-lg font-medium text-[var(--color-text-title)]">Öğrenci bulunamadı</h3><p class="mt-1 text-sm text-[var(--color-text-secondary)]">${searchStudentInput.value ? 'Arama kriterlerinizi değiştirin veya' : ''} yukarıdan yeni bir öğrenci ekleyin.</p></div>`;
+                    studentList.innerHTML = `<div class="text-center py-16 px-6 bg-[var(--color-bg-secondary)] rounded-2xl shadow-xl col-span-full"><img src="https://placehold.co/128x128/E2E8F0/64748B?text=🧑‍🎓" alt="Öğrenci ikonu" class="mx-auto h-32 w-32 rounded-full mb-6 ring-4 ring-[var(--color-bg-hover)]"><h3 class="mt-2 text-2xl font-bold text-[var(--color-text-title)]">Öğrenci Bulunamadı</h3><p class="mt-2 text-md text-[var(--color-text-secondary)] max-w-md mx-auto">${searchStudentInput.value ? 'Arama kriterlerinizi değiştirin veya' : ''} yukarıdan yeni bir öğrenci ekleyin.</p></div>`;
                     return;
                 }
                 
                 students.forEach(student => {
                     const studentCard = document.createElement('div');
-                    studentCard.className = `student-card bg-[var(--color-bg-secondary)] p-5 rounded-xl shadow-md cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative ${student.isStarred ? 'starred' : ''}`;
+                    studentCard.className = `student-card bg-[var(--color-bg-secondary)] rounded-2xl shadow-lg cursor-pointer hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 relative ${student.isStarred ? 'starred' : ''}`;
                     studentCard.dataset.id = student.id;
                     studentCard.innerHTML = `
-                        <button class="star-btn absolute top-3 right-3 text-lg ${student.isStarred ? 'text-[var(--color-star)]' : 'text-[var(--color-text-secondary)]'} hover:text-[var(--color-star)] transition"><i class="${student.isStarred ? 'fas' : 'far'} fa-star"></i></button>
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-full bg-[var(--color-accent-primary-faded)] flex items-center justify-center text-[var(--color-accent-primary)] font-bold text-xl">${student.name.split(' ').map(n => n[0]).join('').toUpperCase()}</div>
-                            <div class="flex-grow"><h3 class="font-semibold text-lg text-[var(--color-text-title)]">${student.name}</h3><div class="flex gap-4 text-sm mt-1"><span class="text-[var(--color-success)] font-medium"><i class="fas fa-plus-circle mr-1"></i>${student.pluses.length}</span><span class="text-[var(--color-danger)] font-medium"><i class="fas fa-minus-circle mr-1"></i>${student.minuses.length}</span></div></div>
+                        <button class="star-btn absolute top-4 right-4 text-xl ${student.isStarred ? 'text-[var(--color-star)]' : 'text-[var(--color-text-secondary)]'} hover:text-[var(--color-star)] transition-transform duration-200 hover:scale-125"><i class="${student.isStarred ? 'fas' : 'far'} fa-star"></i></button>
+                        <div class="flex flex-col items-center text-center p-6">
+                            <div class="w-20 h-20 mb-4 rounded-full bg-[var(--color-accent-primary-faded)] flex items-center justify-center text-[var(--color-accent-primary)] font-bold text-3xl ring-4 ring-[var(--color-bg-hover)]">${student.name.split(' ').map(n => n[0]).join('').toUpperCase()}</div>
+                            <h3 class="font-semibold text-lg text-[var(--color-text-title)]">${student.name}</h3>
+                            <div class="flex gap-4 text-sm mt-2">
+                                <span class="text-[var(--color-success)] font-medium"><i class="fas fa-plus-circle mr-1"></i>${student.pluses.length}</span>
+                                <span class="text-[var(--color-danger)] font-medium"><i class="fas fa-minus-circle mr-1"></i>${student.minuses.length}</span>
+                            </div>
                         </div>`;
                     studentCard.querySelector('.star-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleStar(student.id); });
                     studentCard.addEventListener('click', () => openStudentModal(student.id));
@@ -479,10 +473,8 @@
                 if (student) { student.isStarred = !student.isStarred; saveData(); renderStudents(); }
             }
 
-            // --- Modal İşlevleri ---
-            function getCurrentStudent() {
-                return (appData.students[appData.activeClass] || []).find(s => s.id === currentStudentId);
-            }
+            function getCurrentStudent() { return (appData.students[appData.activeClass] || []).find(s => s.id === currentStudentId); }
+            
             function openStudentModal(studentId) {
                 currentStudentId = studentId;
                 const student = getCurrentStudent();
@@ -490,30 +482,34 @@
                 modalStudentName.textContent = student.name;
                 notesTextarea.value = student.notes;
                 updateModalLists(student);
-                studentModal.classList.remove('hidden'); studentModal.classList.add('flex');
+                studentModal.classList.remove('hidden');
                 setTimeout(() => studentModalContent.classList.remove('scale-95', 'opacity-0'), 10);
             }
+            
             function updateModalLists(student){
                 if(!student) return;
                 plusCount.textContent = student.pluses.length;
                 minusCount.textContent = student.minuses.length;
-                const generateList = (list, type) => {
-                    list.innerHTML = '';
+                const generateList = (listEl, type) => {
+                    listEl.innerHTML = '';
+                    const isPlus = type === 'pluses';
                     student[type].forEach((item, index) => {
                         const date = new Date(item.date).toLocaleDateString('tr-TR');
                         const li = document.createElement('li');
-                        li.className = `bg-[var(--color-${type === 'pluses' ? 'success' : 'danger'}-faded)] text-[var(--color-${type === 'pluses' ? 'success' : 'danger'})] p-2 rounded`;
-                        li.innerHTML = `<div class="flex justify-between items-start"><span>${item.reason}</span> <button data-index="${index}" class="remove-${type}-btn hover:brightness-75 leading-none">&times;</button></div><div class="text-xs text-[var(--color-text-secondary)] mt-1">${date}</div>`;
-                        list.appendChild(li);
+                        li.className = `border-l-4 p-3 rounded-r-lg ${isPlus ? 'border-[var(--color-success)] bg-[var(--color-success-faded)]' : 'border-[var(--color-danger)] bg-[var(--color-danger-faded)]'}`;
+                        li.innerHTML = `<div class="flex justify-between items-start"><p class="text-[var(--color-text-primary)] break-all mr-2">${item.reason}</p><button data-index="${index}" class="remove-${type}-btn text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] leading-none flex-shrink-0">&times;</button></div><div class="text-xs text-[var(--color-text-secondary)] mt-1"><i class="far fa-calendar-alt mr-1.5"></i>${date}</div>`;
+                        listEl.appendChild(li);
                     });
                 };
                 generateList(plusList, 'pluses');
                 generateList(minusList, 'minuses');
             }
+            
             function closeStudentModal() {
                 studentModalContent.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => { studentModal.classList.add('hidden'); studentModal.classList.remove('flex'); }, 300);
+                setTimeout(() => { studentModal.classList.add('hidden'); }, 300);
             }
+
             function openPromptModal({ title, text = '', confirmText, confirmClass, showInput = true, placeholder = '' }) {
                 promptModalTitle.textContent = title;
                 promptModalText.textContent = text;
@@ -522,13 +518,14 @@
                 promptModalInput.style.display = showInput ? 'block' : 'none';
                 promptModalInput.value = '';
                 promptModalInput.placeholder = placeholder;
-                promptModal.classList.remove('hidden'); promptModal.classList.add('flex');
+                promptModal.classList.remove('hidden');
                 setTimeout(() => promptModalContent.classList.remove('scale-95', 'opacity-0'), 10);
                 return new Promise(resolve => { modalResolver = resolve; });
             }
+
             function closePromptModal() {
                 promptModalContent.classList.add('scale-95', 'opacity-0');
-                setTimeout(() => { promptModal.classList.add('hidden'); promptModal.classList.remove('flex'); }, 300);
+                setTimeout(() => { promptModal.classList.add('hidden'); }, 300);
             }
 
             // --- Olay Dinleyicileri ---
@@ -561,6 +558,11 @@
                     appData.students[appData.activeClass].push(newStudent);
                     saveData(); renderStudents(); renderDashboard(); studentNameInput.value = ''; showToast(`${studentName} eklendi!`, 'success');
                 }
+            });
+            
+            addFirstClassBtn.addEventListener('click', () => {
+                classNameInput.focus();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
             searchStudentInput.addEventListener('input', renderStudents);
@@ -630,9 +632,8 @@
             importFileInput.addEventListener('change', async (event) => {
                 const file = event.target.files[0];
                 if (!file) return;
-                const text = await file.text();
                 try {
-                    const importedData = JSON.parse(text);
+                    const importedData = JSON.parse(await file.text());
                     if (importedData.classes && importedData.students) {
                         if(await openPromptModal({title: 'Verileri İçe Aktar', text: 'Mevcut tüm verilerinizin üzerine yazılacaktır. Bu işlem geri alınamaz. Onaylıyor musunuz?', confirmText: 'Evet, Onaylıyorum', showInput: false})) {
                             appData = importedData;
@@ -640,10 +641,8 @@
                             saveData(); loadData(); showToast('Veriler başarıyla içe aktarıldı!', 'success');
                         }
                     } else { throw new Error('Geçersiz dosya formatı'); }
-                } catch (error) {
-                    showToast('Veriler içe aktarılamadı. Dosya bozuk olabilir.', 'error');
-                }
-                importFileInput.value = ''; // Reset for same-file import
+                } catch (error) { showToast('Veriler içe aktarılamadı. Dosya bozuk olabilir.', 'error'); }
+                importFileInput.value = '';
             });
 
             // Başlangıç
