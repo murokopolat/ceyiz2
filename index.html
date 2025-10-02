@@ -3,520 +3,656 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Evrensel Araç Kutusu</title>
-    
-    <!-- Tailwind CSS CDN -->
+    <title>Öğrenci Değerlendirme Sistemi</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Google Fonts: Inter -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide-react@0.378.0/dist/lucide-react.js"></script>
-    <script>
-        // Lucide ikonlarını React olmadan kullanmak için bir yardımcı
-        const createLucideIcon = (name, props) => React.createElement(lucide[name], props);
-    </script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lato:wght@400;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0f172a; /* bg-slate-900 */
+            font-family: var(--font-family, 'Inter', sans-serif);
         }
-        .drag-over {
-            border-color: #3b82f6; /* blue-500 */
-            background-color: #1e293b; /* slate-800 */
+
+        html[data-font='inter'] { --font-family: 'Inter', sans-serif; }
+        html[data-font='roboto'] { --font-family: 'Roboto', sans-serif; }
+        html[data-font='lato'] { --font-family: 'Lato', sans-serif; }
+        html[data-font='poppins'] { --font-family: 'Poppins', sans-serif; }
+        html[data-font='playfair'] { --font-family: 'Playfair Display', serif; }
+        html[data-font='montserrat'] { --font-family: 'Montserrat', sans-serif; }
+        
+        :root, html[data-theme='light'] {
+            --color-bg-primary: #f1f5f9;
+            --color-bg-secondary: #ffffff;
+            --color-bg-hover: #e2e8f0;
+            --color-text-primary: #1e293b;
+            --color-text-secondary: #64748b;
+            --color-text-title: #0f172a;
+            --color-text-inverted: #ffffff;
+            --color-border: #cbd5e1;
+            --color-accent-primary: #2563eb;
+            --color-accent-primary-hover: #1d4ed8;
+            --color-accent-primary-faded: #dbeafe;
+            --color-accent-secondary: #4f46e5;
+            --color-accent-secondary-hover: #4338ca;
+            --color-success: #16a34a;
+            --color-success-hover: #15803d;
+            --color-success-faded: #f0fdf4;
+            --color-danger: #dc2626;
+            --color-danger-hover: #b91c1c;
+            --color-danger-faded: #fef2f2;
+            --color-neutral: #475569;
+            --color-neutral-hover: #334155;
+            --color-star: #f59e0b;
         }
-        .progress-bar-inner {
-            transition: width 0.3s ease-in-out;
+
+        html[data-theme='dark'] {
+            --color-bg-primary: #0f172a;
+            --color-bg-secondary: #1e293b;
+            --color-bg-hover: #334155;
+            --color-text-primary: #e2e8f0;
+            --color-text-secondary: #94a3b8;
+            --color-text-title: #f1f5f9;
+            --color-text-inverted: #ffffff;
+            --color-border: #475569;
+            --color-accent-primary: #3b82f6;
+            --color-accent-primary-hover: #60a5fa;
+            --color-accent-primary-faded: #1e293b;
+            --color-accent-secondary: #6366f1;
+            --color-accent-secondary-hover: #818cf8;
+            --color-success: #22c55e;
+            --color-success-hover: #4ade80;
+            --color-success-faded: #162a22;
+            --color-danger: #ef4444;
+            --color-danger-hover: #f87171;
+            --color-danger-faded: #2e1a1d;
+            --color-neutral: #64748b;
+            --color-neutral-hover: #94a3b8;
+            --color-star: #facc15;
         }
-        /* Özel animasyonlar */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        
+        html[data-theme='forest'] {
+            --color-bg-primary: #1a2e26;
+            --color-bg-secondary: #244237;
+            --color-bg-hover: #305747;
+            --color-text-primary: #d4e5d9;
+            --color-text-secondary: #a3b9a9;
+            --color-text-title: #f0fff5;
+            --color-text-inverted: #ffffff;
+            --color-border: #416b57;
+            --color-accent-primary: #34d399;
+            --color-accent-primary-hover: #6ee7b7;
+            --color-accent-primary-faded: #13271f;
+            --color-accent-secondary: #2dd4bf;
+            --color-accent-secondary-hover: #5eead4;
+            --color-success: #4ade80;
+            --color-success-hover: #86efac;
+            --color-success-faded: #1b302a;
+            --color-danger: #f87171;
+            --color-danger-hover: #fca5a5;
+            --color-danger-faded: #392129;
+            --color-neutral: #528c74;
+            --color-neutral-hover: #65a98d;
+            --color-star: #fde047;
         }
-        .fade-in {
-            animation: fadeIn 0.5s ease-out forwards;
+
+        html[data-theme='sunset'] {
+            --color-bg-primary: #2c1b3e;
+            --color-bg-secondary: #432a5a;
+            --color-bg-hover: #5a3a78;
+            --color-text-primary: #fbd8c3;
+            --color-text-secondary: #e3a9c3;
+            --color-text-title: #fff0e9;
+            --color-text-inverted: #ffffff;
+            --color-border: #6d4d86;
+            --color-accent-primary: #f97316;
+            --color-accent-primary-hover: #fb923c;
+            --color-accent-primary-faded: #3b254d;
+            --color-accent-secondary: #f43f5e;
+            --color-accent-secondary-hover: #fb7185;
+            --color-success: #34d399;
+            --color-success-hover: #6ee7b7;
+            --color-success-faded: #1d333b;
+            --color-danger: #f43f5e;
+            --color-danger-hover: #fb7185;
+            --color-danger-faded: #3e1b30;
+            --color-neutral: #c084fc;
+            --color-neutral-hover: #d8b4fe;
+            --color-star: #fbbf24;
         }
+
+        .tab-active {
+            border-color: var(--color-accent-primary) !important;
+            background-color: var(--color-accent-primary-faded) !important;
+            color: var(--color-accent-primary) !important;
+        }
+        .student-card.starred {
+            box-shadow: 0 0 0 2px var(--color-star);
+        }
+
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        .modal-content { max-height: 80vh; }
     </style>
 </head>
-<body class="bg-slate-900 text-white antialiased">
+<body class="bg-[var(--color-bg-primary)] text-[var(--color-text-primary)] transition-colors duration-300">
 
-    <div class="container mx-auto p-4 md:p-8 max-w-6xl">
-
-        <!-- Başlık ve Dil Seçimi -->
-        <header class="flex justify-between items-center mb-8">
-            <div class="flex items-center space-x-3">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="m11.5 15.5 3-3-3-3"></path></svg>
-                <h1 class="text-2xl md:text-3xl font-bold text-slate-100" data-translate-key="title">Evrensel Araç Kutusu</h1>
-            </div>
-            <div class="flex items-center space-x-2">
-                <button id="lang-tr" class="px-3 py-1 text-sm rounded-md bg-blue-600 font-semibold">TR</button>
-                <button id="lang-en" class="px-3 py-1 text-sm rounded-md bg-slate-700 hover:bg-slate-600 font-semibold transition-colors">EN</button>
-            </div>
+    <div class="container mx-auto p-4 md:p-8 relative">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-[var(--color-text-title)]">Öğrenci Değerlendirme Sistemi</h1>
+            <p class="text-[var(--color-text-secondary)] mt-2">Sınıflarınızı oluşturun, öğrencilerinizi yönetin.</p>
         </header>
 
-        <main>
-            <!-- Ana Dosya Yükleme Alanı -->
-            <section id="drop-zone" class="w-full border-2 border-dashed border-slate-600 rounded-xl p-8 md:p-12 text-center cursor-pointer transition-all duration-300 hover:border-blue-500 hover:bg-slate-800">
-                <div class="flex flex-col items-center justify-center space-y-4 text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="text-slate-500"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" x2="12" y1="3" y2="15"></line></svg>
-                    <p class="text-lg font-medium" data-translate-key="drop_zone_text">Dosyaları buraya sürükleyip bırakın</p>
-                    <p class="text-slate-500" data-translate-key="or">veya</p>
-                    <button id="file-select-btn" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors" data-translate-key="select_file_btn">Dosya Seç</button>
-                    <input type="file" id="file-input" class="hidden" multiple>
-                </div>
-            </section>
+        <!-- Ayarlar Butonları -->
+        <div class="absolute top-0 right-4 md:right-8 flex items-center gap-2 z-10">
+            <!-- Font Seçici -->
+            <div class="relative" id="font-selector-container">
+                <button id="font-selector-btn" class="w-10 h-10 bg-[var(--color-bg-secondary)] rounded-full shadow-md flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-accent-primary)] transition" title="Yazı Tipini Değiştir">
+                    <i class="fas fa-font"></i>
+                </button>
+                <div id="font-options" class="absolute right-0 mt-2 w-48 bg-[var(--color-bg-secondary)] rounded-lg shadow-xl p-2 z-20 hidden ring-1 ring-black/5"></div>
+            </div>
+            <!-- Tema Seçici -->
+            <div class="relative" id="theme-selector-container">
+                <button id="theme-selector-btn" class="w-10 h-10 bg-[var(--color-bg-secondary)] rounded-full shadow-md flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-accent-primary)] transition" title="Temayı Değiştir">
+                    <i class="fas fa-palette"></i>
+                </button>
+                <div id="theme-options" class="absolute right-0 mt-2 w-48 bg-[var(--color-bg-secondary)] rounded-lg shadow-xl p-2 z-20 hidden ring-1 ring-black/5"></div>
+            </div>
+        </div>
 
-            <!-- Yüklenen Dosyalar Listesi -->
-            <section id="file-list-section" class="mt-8 hidden">
-                <div id="file-list" class="space-y-3">
-                    <!-- Dosya öğeleri buraya dinamik olarak eklenecek -->
-                </div>
+        <!-- Sınıf ve Veri Yönetimi -->
+        <div class="bg-[var(--color-bg-secondary)] p-6 rounded-xl shadow-md mb-8 max-w-4xl mx-auto">
+            <h2 class="text-xl font-semibold mb-4 text-[var(--color-text-title)]">Sınıf Yönetimi</h2>
+            <form id="add-class-form" class="flex flex-col sm:flex-row gap-4 mb-4">
+                <input type="text" id="class-name-input" placeholder="Yeni Sınıf Adı (örn: 8-A)" class="flex-grow p-3 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-secondary)] focus:outline-none transition" required>
+                <button type="submit" class="bg-[var(--color-accent-secondary)] text-[var(--color-text-inverted)] font-semibold py-3 px-6 rounded-lg hover:bg-[var(--color-accent-secondary-hover)] transition-all duration-300 shadow-sm flex items-center justify-center gap-2">
+                    <i class="fas fa-plus"></i>
+                    <span>Sınıf Oluştur</span>
+                </button>
+            </form>
+            <div id="class-tabs-container" class="flex flex-wrap gap-2 border-t border-[var(--color-border)] pt-4"></div>
+             <!-- Veri Yönetimi -->
+            <div class="border-t border-[var(--color-border)] mt-4 pt-4 flex flex-col sm:flex-row gap-2 text-sm">
+                <button id="export-data-btn" class="flex-1 bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] font-semibold py-2 px-4 rounded-lg hover:brightness-95 transition flex items-center justify-center gap-2">
+                    <i class="fas fa-download"></i> Verileri Dışa Aktar (Yedekle)
+                </button>
+                <button id="import-data-btn" class="flex-1 bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] font-semibold py-2 px-4 rounded-lg hover:brightness-95 transition flex items-center justify-center gap-2">
+                    <i class="fas fa-upload"></i> Verileri İçe Aktar (Geri Yükle)
+                </button>
+                <input type="file" id="import-file-input" class="hidden" accept=".json">
+            </div>
+        </div>
 
-                <!-- İşlem Butonları -->
-                <div id="action-buttons" class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-                     <div class="text-sm text-slate-400">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="inline mr-1"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 6v6l4 2"></path></svg>
-                        <span data-translate-key="auto_delete_note">Dosyalar 24 saat sonra otomatik olarak silinir.</span>
-                    </div>
-                    <div class="flex gap-4">
-                        <button id="add-more-btn" class="bg-slate-600 text-slate-100 font-semibold px-6 py-3 rounded-lg hover:bg-slate-700 transition-colors w-full sm:w-auto" data-translate-key="add_more_btn">Daha Fazla Ekle</button>
-                        <button id="convert-btn" class="bg-green-600 text-white font-bold px-8 py-3 rounded-lg hover:bg-green-700 transition-colors w-full sm:w-auto flex items-center justify-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"></path><path d="M19 12H5"></path></svg>
-                            <span data-translate-key="convert_btn">İşlemi Başlat</span>
-                        </button>
-                    </div>
-                </div>
-                
-                 <!-- Toplu İndirme Butonu (Gizli) -->
-                <div id="batch-download-section" class="mt-6 text-center hidden">
-                    <button id="download-zip-btn" class="bg-blue-600 text-white font-bold px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 mx-auto">
-                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" x2="12" y1="15" y2="3"></line></svg>
-                        <span data-translate-key="download_all_zip">Tümünü ZIP Olarak İndir</span>
+        <!-- Öğrenci Bölümü -->
+        <div id="student-section" class="hidden">
+            <!-- İstatistik Paneli -->
+            <div id="stats-dashboard" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 max-w-4xl mx-auto"></div>
+        
+            <!-- Yeni Öğrenci Ekleme ve Arama -->
+            <div class="bg-[var(--color-bg-secondary)] p-6 rounded-xl shadow-md mb-8 max-w-4xl mx-auto">
+                <h2 class="text-xl font-semibold mb-4 text-[var(--color-text-title)]">Öğrenci Yönetimi (<span id="active-class-name-form" class="font-bold text-[var(--color-accent-primary)]"></span>)</h2>
+                <form id="add-student-form" class="flex flex-col sm:flex-row gap-4 mb-4">
+                    <input type="text" id="student-name-input" placeholder="Öğrenci Adı ve Soyadı" class="flex-grow p-3 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition" required>
+                    <button type="submit" class="bg-[var(--color-accent-primary)] text-[var(--color-text-inverted)] font-semibold py-3 px-6 rounded-lg hover:bg-[var(--color-accent-primary-hover)] transition-all duration-300 shadow-sm flex items-center justify-center gap-2">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Öğrenci Ekle</span>
                     </button>
+                </form>
+                <div class="border-t border-[var(--color-border)] pt-4 flex flex-col sm:flex-row gap-4 items-center">
+                    <div class="relative flex-grow w-full">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"></i>
+                        <input type="text" id="search-student-input" placeholder="Öğrenci Ara..." class="w-full p-2 pl-10 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition">
+                    </div>
+                    <div class="relative w-full sm:w-auto">
+                        <select id="sort-students-select" class="w-full appearance-none p-2 pr-8 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition">
+                            <option value="name-asc">İsme Göre (A-Z)</option>
+                            <option value="name-desc">İsme Göre (Z-A)</option>
+                            <option value="plus-desc">En Çok Artı</option>
+                            <option value="minus-desc">En Çok Eksi</option>
+                        </select>
+                         <i class="fas fa-chevron-down absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] pointer-events-none"></i>
+                    </div>
                 </div>
-            </section>
+            </div>
 
-            <!-- Araçlar -->
-            <section class="mt-16 space-y-12">
-                <div>
-                    <h2 class="text-xl font-semibold mb-4 text-slate-300" data-translate-key="pdf_tools_title">PDF Araçları</h2>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-purple-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M12 12v6"></path><path d="M9 15h6"></path></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_merge_pdf">PDF Birleştir</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-purple-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><path d="M15 12H9"></path><path d="M21 15h-3"></path><path d="M21 9h-3"></path><path d="M3 15h3"></path><path d="M3 9h3"></path></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_split_pdf">PDF Ayır</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-red-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><path d="M10 15.5v-5"></path><path d="M13 15.5v-5"></path><path d="M16 15.5v-5"></path></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_compress_pdf">PDF Sıkıştır</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-blue-400"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" /><polyline points="14 2 14 8 20 8" /><path d="M8 18h1" /><path d="M11 18h1" /><path d="M14 18h1" /><path d="M8 14h1" /><path d="M11 14h1" /><path d="M14 14h1" /><path d="M8 10h1" /><path d="M11 10h1" /><path d="M14 10h1" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_pdf_to_word">PDF'ten Word'e</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-red-500"><rect x="2" y="3" width="20" height="18" rx="2" /><path d="M6.5 3v18" /><path d="M14 8h-4" /><path d="M14 12h-4" /><path d="M10 16h1" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_pdf_to_ppt">PDF'ten PowerPoint'e</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-green-500"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><line x1="3" y1="9" x2="21" y2="9" /><line x1="9" x2="9" y1="21" y2="9" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_pdf_to_excel">PDF'ten Excel'e</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-indigo-400"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_protect_pdf">PDF Şifrele</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-indigo-400"><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 9.9-1" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_unlock_pdf">PDF Şifre Çöz</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-sky-400"><path d="m12 2-7 7h4v6h6v-6h4z" /><path d="M12 22v-6" /><path d="M4 16h16" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_watermark_pdf">PDF Filigran Ekle</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-sky-400"><path d="M15 2 9 8l3 3-10 10 3 3 10-10 3 3z" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_rotate_pdf">PDF Döndür</span></div>
-                    </div>
-                </div>
-                <div>
-                    <h2 class="text-xl font-semibold mb-4 text-slate-300" data-translate-key="image_tools_title">Görüntü Araçları</h2>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-yellow-400"><path d="M12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_image_converter">Görüntü Dönüştürücü</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-yellow-400"><path d="M12 3H3v18h18v-9"/><path d="M16 3h5v5"/><path d="M16 8.5L21 3.5"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_compress_image">Görüntü Sıkıştır</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-yellow-400"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10v4h10v-4"/><path d="M17 5H7l5 5z"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_resize_image">Görüntü Boyutlandır</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-blue-400"><path d="M4 7V5a2 2 0 0 1 2-2h2"/><path d="M16 3h2a2 2 0 0 1 2 2v2"/><path d="M4 17v2a2 2 0 0 0 2 2h2"/><path d="M16 21h2a2 2 0 0 0 2-2v-2"/><path d="M12 12v.01"/><path d="M8 12v.01"/><path d="M16 12v.01"/><path d="M12 8v.01"/><path d="M8 8v.01"/><path d="M16 8v.01"/><path d="M12 16v.01"/><path d="M8 16v.01"/><path d="M16 16v.01"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_ocr">Görüntüden Metin (OCR)</span></div>
-                    </div>
-                </div>
-                 <div>
-                    <h2 class="text-xl font-semibold mb-4 text-slate-300" data-translate-key="video_tools_title">Video Araçları</h2>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-rose-400"><path d="m22 8-6 4 6 4V8Z"/><path d="M14 12H2a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h12v10Z"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_video_converter">Video Dönüştürücü</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-rose-400"><path d="M12 3H3v18h18v-9"/><path d="M16 3h5v5"/><path d="M16 8.5L21 3.5"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_compress_video">Video Sıkıştır</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-rose-400"><path d="M15 3H9"/><path d="M15 21H9"/><path d="M3 9v6"/><path d="M21 9v6"/><path d="m8 12 8-5"/><path d="m8 12 8 5"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_trim_video">Video Kırp</span></div>
-                        <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-rose-400"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><path d="M3 9h18" /><path d="M3 15h18" /><path d="M9 3v18" /><path d="M15 3v18" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_merge_video">Video Birleştir</span></div>
-                    </div>
-                </div>
-                 <div>
-                    <h2 class="text-xl font-semibold mb-4 text-slate-300" data-translate-key="audio_tools_title">Ses Araçları</h2>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-cyan-400"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_audio_converter">Ses Dönüştürücü</span></div>
-                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-cyan-400"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_change_volume">Sesi Ayarla</span></div>
-                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-cyan-400"><path d="M15 3H9"/><path d="M15 21H9"/><path d="M3 9v6"/><path d="M21 9v6"/><path d="m8 12 8-5"/><path d="m8 12 8 5"/></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_trim_audio">Ses Kırp</span></div>
-                    </div>
-                </div>
-                <div>
-                    <h2 class="text-xl font-semibold mb-4 text-slate-300" data-translate-key="archive_tools_title">Arşiv Araçları</h2>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-lime-400"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_create_archive">Arşiv Oluştur (ZIP)</span></div>
-                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-lime-400"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_extract_archive">Arşiv Çıkart</span></div>
-                    </div>
-                </div>
-                 <div>
-                    <h2 class="text-xl font-semibold mb-4 text-slate-300" data-translate-key="other_tools_title">Diğer Araçlar</h2>
-                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-teal-400"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><path d="M7 7h4v4H7z" /><path d="M13 7h4" /><path d="M13 11h4" /><path d="M7 15h2" /><path d="M13 15h.01" /><path d="M17 15h.01" /><path d="M17 11h.01" /><path d="M17 7h.01" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_qr_generator">QR Kod Oluşturucu</span></div>
-                       <div class="bg-slate-800 p-4 rounded-lg text-center hover:bg-slate-700 cursor-pointer transition-colors space-y-2"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto text-teal-400"><path d="M16 20h4a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2h4" /></svg><span class="text-sm font-medium text-slate-300" data-translate-key="tool_hash_generator">Hash Oluşturucu</span></div>
-                    </div>
-                </div>
-            </section>
-        </main>
+            <!-- Öğrenci Listesi -->
+            <div id="student-list-container">
+                <div id="student-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+            </div>
+        </div>
+         <div id="empty-state-no-class" class="text-center py-10 px-6 bg-[var(--color-bg-secondary)] rounded-xl shadow-md max-w-2xl mx-auto hidden">
+            <svg class="mx-auto h-16 w-16 text-[var(--color-text-secondary)]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+            <h3 class="mt-4 text-xl font-semibold text-[var(--color-text-title)]">Başlamak için bir sınıf oluşturun</h3>
+            <p class="mt-2 text-sm text-[var(--color-text-secondary)]">Yukarıdaki "Sınıf Yönetimi" bölümünden ilk sınıfınızı ekleyebilirsiniz.</p>
+        </div>
     </div>
 
-    <script>
-        // Dil çevirileri
-        const translations = {
-            tr: {
-                title: "Evrensel Araç Kutusu",
-                drop_zone_text: "Dosyaları buraya sürükleyip bırakın",
-                or: "veya",
-                select_file_btn: "Dosya Seç",
-                auto_delete_note: "Dosyalar 24 saat sonra otomatik olarak silinir.",
-                add_more_btn: "Daha Fazla Ekle",
-                convert_btn: "İşlemi Başlat",
-                download_all_zip: "Tümünü ZIP Olarak İndir",
-                pdf_tools_title: "PDF Araçları",
-                tool_merge_pdf: "PDF Birleştir",
-                tool_split_pdf: "PDF Ayır",
-                tool_compress_pdf: "PDF Sıkıştır",
-                tool_pdf_to_word: "PDF'ten Word'e",
-                tool_pdf_to_ppt: "PDF'ten PowerPoint'e",
-                tool_pdf_to_excel: "PDF'ten Excel'e",
-                tool_protect_pdf: "PDF Şifrele",
-                tool_unlock_pdf: "PDF Şifre Çöz",
-                tool_watermark_pdf: "PDF Filigran Ekle",
-                tool_rotate_pdf: "PDF Döndür",
-                image_tools_title: "Görüntü Araçları",
-                tool_image_converter: "Görüntü Dönüştürücü",
-                tool_compress_image: "Görüntü Sıkıştır",
-                tool_resize_image: "Görüntü Boyutlandır",
-                tool_ocr: "Görüntüden Metin (OCR)",
-                video_tools_title: "Video Araçları",
-                tool_video_converter: "Video Dönüştürücü",
-                tool_compress_video: "Video Sıkıştır",
-                tool_trim_video: "Video Kırp",
-                tool_merge_video: "Video Birleştir",
-                audio_tools_title: "Ses Araçları",
-                tool_audio_converter: "Ses Dönüştürücü",
-                tool_change_volume: "Sesi Ayarla",
-                tool_trim_audio: "Ses Kırp",
-                archive_tools_title: "Arşiv Araçları",
-                tool_create_archive: "Arşiv Oluştur (ZIP)",
-                tool_extract_archive: "Arşiv Çıkart",
-                other_tools_title: "Diğer Araçlar",
-                tool_qr_generator: "QR Kod Oluşturucu",
-                tool_hash_generator: "Hash Oluşturucu",
-                status_waiting: "Bekliyor",
-                status_converting: "Dönüştürülüyor...",
-                status_compressing: "Sıkıştırılıyor...",
-                status_resizing: "Yeniden Boyutlandırılıyor...",
-                status_completed: "Tamamlandı",
-                status_error: "Hata",
-                download: "İndir"
-            },
-            en: {
-                title: "Universal Toolbox",
-                drop_zone_text: "Drag and drop files here",
-                or: "or",
-                select_file_btn: "Select File",
-                auto_delete_note: "Files are automatically deleted after 24 hours.",
-                add_more_btn: "Add More",
-                convert_btn: "Start Process",
-                download_all_zip: "Download All as ZIP",
-                pdf_tools_title: "PDF Tools",
-                tool_merge_pdf: "Merge PDF",
-                tool_split_pdf: "Split PDF",
-                tool_compress_pdf: "Compress PDF",
-                tool_pdf_to_word: "PDF to Word",
-                tool_pdf_to_ppt: "PDF to PowerPoint",
-                tool_pdf_to_excel: "PDF to Excel",
-                tool_protect_pdf: "Protect PDF",
-                tool_unlock_pdf: "Unlock PDF",
-                tool_watermark_pdf: "Watermark PDF",
-                tool_rotate_pdf: "Rotate PDF",
-                image_tools_title: "Image Tools",
-                tool_image_converter: "Image Converter",
-                tool_compress_image: "Compress Image",
-                tool_resize_image: "Resize Image",
-                tool_ocr: "Image to Text (OCR)",
-                video_tools_title: "Video Tools",
-                tool_video_converter: "Video Converter",
-                tool_compress_video: "Compress Video",
-                tool_trim_video: "Trim Video",
-                tool_merge_video: "Merge Video",
-                audio_tools_title: "Audio Tools",
-                tool_audio_converter: "Audio Converter",
-                tool_change_volume: "Change Volume",
-                tool_trim_audio: "Trim Audio",
-                archive_tools_title: "Archive Tools",
-                tool_create_archive: "Create Archive (ZIP)",
-                tool_extract_archive: "Extract Archive",
-                other_tools_title: "Other Tools",
-                tool_qr_generator: "QR Code Generator",
-                tool_hash_generator: "Hash Generator",
-                status_waiting: "Waiting",
-                status_converting: "Converting...",
-                status_compressing: "Compressing...",
-                status_resizing: "Resizing...",
-                status_completed: "Completed",
-                status_error: "Error",
-                download: "Download"
-            }
-        };
-
-        // DOM Elementleri
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-input');
-        const fileSelectBtn = document.getElementById('file-select-btn');
-        const fileListSection = document.getElementById('file-list-section');
-        const fileListContainer = document.getElementById('file-list');
-        const convertBtn = document.getElementById('convert-btn');
-        const addMoreBtn = document.getElementById('add-more-btn');
-        const batchDownloadSection = document.getElementById('batch-download-section');
-        const langTrBtn = document.getElementById('lang-tr');
-        const langEnBtn = document.getElementById('lang-en');
-
-        let filesToProcess = [];
-        let currentLang = 'tr';
-
-        // --- DİL YÖNETİMİ ---
-        const setLanguage = (lang) => {
-            if (lang !== currentLang) {
-                currentLang = lang;
-                document.documentElement.lang = lang;
-                
-                const elements = document.querySelectorAll('[data-translate-key]');
-                elements.forEach(el => {
-                    const key = el.getAttribute('data-translate-key');
-                    if (translations[lang][key]) {
-                        el.innerText = translations[lang][key];
-                    }
-                });
-                
-                if(lang === 'tr') {
-                    langTrBtn.classList.remove('bg-slate-700', 'hover:bg-slate-600');
-                    langTrBtn.classList.add('bg-blue-600');
-                    langEnBtn.classList.add('bg-slate-700', 'hover:bg-slate-600');
-                    langEnBtn.classList.remove('bg-blue-600');
-                } else {
-                    langEnBtn.classList.remove('bg-slate-700', 'hover:bg-slate-600');
-                    langEnBtn.classList.add('bg-blue-600');
-                    langTrBtn.classList.add('bg-slate-700', 'hover:bg-slate-600');
-                    langTrBtn.classList.remove('bg-blue-600');
-                }
-                
-                renderFileList();
-            }
-        };
-
-        langTrBtn.addEventListener('click', () => setLanguage('tr'));
-        langEnBtn.addEventListener('click', () => setLanguage('en'));
-
-        // --- DOSYA YÜKLEME İŞLEMLERİ ---
-        dropZone.addEventListener('click', () => fileInput.click());
-        fileSelectBtn.addEventListener('click', () => fileInput.click());
-        addMoreBtn.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
-
-        dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-        dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('drag-over'); });
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            handleFiles(e.dataTransfer.files);
-        });
-
-        const handleFiles = (newFiles) => {
-            for (const file of newFiles) {
-                if (!filesToProcess.some(f => f.file.name === file.name && f.file.size === file.size)) {
-                    filesToProcess.push({
-                        id: 'file_' + Math.random().toString(36).substr(2, 9),
-                        file: file,
-                        status: 'waiting',
-                        progress: 0,
-                        targetFormat: ''
-                    });
-                }
-            }
-            fileListSection.classList.remove('hidden');
-            dropZone.classList.add('hidden');
-            renderFileList();
-        };
-
-        // --- UI GÜNCELLEME ---
-        const renderFileList = () => {
-            fileListContainer.innerHTML = '';
-            filesToProcess.forEach((fileWrapper) => {
-                const fileItem = document.createElement('div');
-                fileItem.id = fileWrapper.id;
-                fileItem.className = 'bg-slate-800 p-4 rounded-lg flex flex-col sm:flex-row items-center gap-4 fade-in';
-                
-                const fileExtension = getFileExtension(fileWrapper.file.name);
-                const targetFormats = getTargetFormats(fileExtension);
-                
-                if (!fileWrapper.targetFormat && targetFormats.length > 0) {
-                     fileWrapper.targetFormat = targetFormats[0].value;
-                }
-
-                let optionsHTML = targetFormats.map(f => `<option value="${f.value}" ${fileWrapper.targetFormat === f.value ? 'selected' : ''}>${f.label}</option>`).join('');
-
-                fileItem.innerHTML = `
-                    <div class="flex-shrink-0">${getFileIcon(fileExtension)}</div>
-                    <div class="flex-grow text-center sm:text-left w-full sm:w-auto overflow-hidden">
-                        <p class="font-semibold text-slate-100 truncate" title="${fileWrapper.file.name}">${fileWrapper.file.name}</p>
-                        <p class="text-sm text-slate-400">${formatFileSize(fileWrapper.file.size)}</p>
-                    </div>
-                    <div class="flex items-center gap-4 w-full sm:w-auto">
-                        <select id="format-select-${fileWrapper.id}" class="bg-slate-700 border border-slate-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5">
-                            ${optionsHTML}
-                        </select>
-                        <button class="remove-file-btn text-slate-500 hover:text-red-400 transition-colors flex-shrink-0" data-file-id="${fileWrapper.id}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    <!-- Modal ve Bildirimler -->
+    <div id="student-modal" class="fixed inset-0 bg-black/60 items-center justify-center hidden z-50 p-4">
+        <div class="bg-[var(--color-bg-secondary)] rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 scale-95 opacity-0 modal-content overflow-y-auto">
+            <div class="p-6 md:p-8">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 class="text-2xl font-bold text-[var(--color-text-title)]" id="modal-student-name"></h2>
+                    <button id="close-modal-btn" class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-2xl leading-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-[var(--color-success-faded)] p-4 rounded-lg">
+                        <h3 class="font-semibold text-lg text-[var(--color-success)] mb-3">Artıları (<span id="plus-count">0</span>)</h3>
+                        <ul id="plus-list" class="space-y-2 text-sm max-h-40 overflow-y-auto pr-2"></ul>
+                        <button id="add-plus-btn" class="mt-4 w-full bg-[var(--color-success)] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[var(--color-success-hover)] transition flex items-center justify-center gap-2">
+                            <i class="fas fa-plus"></i> <span>Artı Ekle</span>
                         </button>
                     </div>
-                    <div class="w-full sm:w-1/3">
-                        <div class="status-container flex items-center justify-center gap-2"></div>
+                    <div class="bg-[var(--color-danger-faded)] p-4 rounded-lg">
+                        <h3 class="font-semibold text-lg text-[var(--color-danger)] mb-3">Eksileri (<span id="minus-count">0</span>)</h3>
+                        <ul id="minus-list" class="space-y-2 text-sm max-h-40 overflow-y-auto pr-2"></ul>
+                        <button id="add-minus-btn" class="mt-4 w-full bg-[var(--color-danger)] text-white font-semibold py-2 px-4 rounded-lg hover:bg-[var(--color-danger-hover)] transition flex items-center justify-center gap-2">
+                            <i class="fas fa-minus"></i> <span>Eksi Ekle</span>
+                        </button>
                     </div>
-                `;
-                
-                fileListContainer.appendChild(fileItem);
-                updateStatusUI(fileWrapper);
+                </div>
+                <div class="mt-6">
+                    <h3 class="font-semibold text-lg text-[var(--color-text-title)] mb-3">Öğrenci Hakkında Notlar</h3>
+                    <textarea id="notes-textarea" class="w-full p-3 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg h-28 focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition" placeholder="Bu alana öğrenciyle ilgili notlarınızı ekleyebilirsiniz..."></textarea>
+                    <button id="save-notes-btn" class="mt-3 w-full bg-[var(--color-neutral)] text-[var(--color-text-inverted)] font-semibold py-2 px-4 rounded-lg hover:bg-[var(--color-neutral-hover)] transition flex items-center justify-center gap-2">
+                        <i class="fas fa-save"></i> <span>Notları Kaydet</span>
+                    </button>
+                </div>
+            </div>
+            <div class="bg-[var(--color-bg-hover)] p-4 md:p-6 mt-4 rounded-b-2xl">
+                 <button id="delete-student-btn" class="w-full bg-transparent border border-[var(--color-danger)] text-[var(--color-danger)] font-semibold py-2 px-4 rounded-lg hover:bg-[var(--color-danger)] hover:text-white transition flex items-center justify-center gap-2">
+                    <i class="fas fa-trash-alt"></i> <span>Bu Öğrenciyi Sil</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="prompt-modal" class="fixed inset-0 bg-black/60 items-center justify-center hidden z-50 p-4">
+        <div id="prompt-modal-content" class="bg-[var(--color-bg-secondary)] rounded-2xl shadow-2xl w-full max-w-sm p-6 transform transition-all duration-300 scale-95 opacity-0">
+            <h3 id="prompt-modal-title" class="text-lg font-semibold mb-2 text-[var(--color-text-title)]"></h3>
+            <p id="prompt-modal-text" class="text-[var(--color-text-secondary)] mb-4 text-sm"></p>
+            <input type="text" id="prompt-modal-input" class="w-full p-2 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition mb-4" placeholder="">
+            <div class="flex justify-end gap-3">
+                <button id="prompt-modal-cancel-btn" class="bg-[var(--color-bg-hover)] text-[var(--color-text-primary)] font-semibold py-2 px-4 rounded-lg hover:brightness-95 transition">İptal</button>
+                <button id="prompt-modal-confirm-btn" class="text-white font-semibold py-2 px-4 rounded-lg transition"></button>
+            </div>
+        </div>
+    </div>
 
-                document.getElementById(`format-select-${fileWrapper.id}`).addEventListener('change', (e) => {
-                    fileWrapper.targetFormat = e.target.value;
+    <div id="toast" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-5 rounded-lg shadow-xl opacity-0 transform translate-y-10 transition-all duration-300 z-50"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const getEl = (id) => document.getElementById(id);
+
+            // Ana Elementler
+            const addClassForm = getEl('add-class-form');
+            const classNameInput = getEl('class-name-input');
+            const classTabsContainer = getEl('class-tabs-container');
+            const studentSection = getEl('student-section');
+            const activeClassNameForm = getEl('active-class-name-form');
+            const addStudentForm = getEl('add-student-form');
+            const studentNameInput = getEl('student-name-input');
+            const studentList = getEl('student-list');
+            const searchStudentInput = getEl('search-student-input');
+            const sortStudentsSelect = getEl('sort-students-select');
+            const statsDashboard = getEl('stats-dashboard');
+            const toast = getEl('toast');
+            const emptyStateNoClass = getEl('empty-state-no-class');
+            const exportDataBtn = getEl('export-data-btn');
+            const importDataBtn = getEl('import-data-btn');
+            const importFileInput = getEl('import-file-input');
+
+            // Tema ve Font Elementleri
+            const themeSelectorContainer = getEl('theme-selector-container');
+            const themeSelectorBtn = getEl('theme-selector-btn');
+            const themeOptions = getEl('theme-options');
+            const fontSelectorContainer = getEl('font-selector-container');
+            const fontSelectorBtn = getEl('font-selector-btn');
+            const fontOptions = getEl('font-options');
+            
+            const themes = [ { id: 'light', name: 'Varsayılan' }, { id: 'dark', name: 'Gece' }, { id: 'forest', name: 'Orman' }, { id: 'sunset', name: 'Gün Batımı' } ];
+            const fonts = [ { id: 'inter', name: 'Inter' }, { id: 'roboto', name: 'Roboto' }, { id: 'lato', name: 'Lato' }, { id: 'poppins', name: 'Poppins' }, { id: 'playfair', name: 'Playfair Display' }, { id: 'montserrat', name: 'Cocogoose (Benzeri)' } ];
+
+            // Öğrenci Detay Modal Elementleri
+            const studentModal = getEl('student-modal');
+            const studentModalContent = studentModal.querySelector('.modal-content');
+            const closeModalBtn = getEl('close-modal-btn');
+            const modalStudentName = getEl('modal-student-name');
+            const plusCount = getEl('plus-count');
+            const plusList = getEl('plus-list');
+            const addPlusBtn = getEl('add-plus-btn');
+            const minusCount = getEl('minus-count');
+            const minusList = getEl('minus-list');
+            const addMinusBtn = getEl('add-minus-btn');
+            const notesTextarea = getEl('notes-textarea');
+            const saveNotesBtn = getEl('save-notes-btn');
+            const deleteStudentBtn = getEl('delete-student-btn');
+
+            // Özel Prompt/Confirm Modal Elementleri
+            const promptModal = getEl('prompt-modal');
+            const promptModalContent = promptModal.querySelector('#prompt-modal-content');
+            const promptModalTitle = getEl('prompt-modal-title');
+            const promptModalText = getEl('prompt-modal-text');
+            const promptModalInput = getEl('prompt-modal-input');
+            const promptModalCancelBtn = getEl('prompt-modal-cancel-btn');
+            const promptModalConfirmBtn = getEl('prompt-modal-confirm-btn');
+            let modalResolver;
+
+            let appData = { classes: [], students: {}, activeClass: null };
+            let currentStudentId = null;
+
+            // --- Tema ve Font Yönetimi ---
+            function applyTheme(themeId) { document.documentElement.setAttribute('data-theme', themeId); localStorage.setItem('appTheme', themeId); }
+            function applyFont(fontId) { document.documentElement.setAttribute('data-font', fontId); localStorage.setItem('appFont', fontId); }
+            function renderOptions(container, items, callback) {
+                container.innerHTML = '';
+                items.forEach(item => {
+                    const option = document.createElement('button');
+                    option.className = 'w-full text-left px-4 py-2 rounded-md text-sm text-[var(--color-text-primary)] hover:bg-[var(--color-bg-hover)]';
+                    option.textContent = item.name;
+                    if(item.id.includes('-')) option.style.fontFamily = `var(--font-family, ${item.name})`;
+                    option.addEventListener('click', () => { callback(item.id); container.classList.add('hidden'); });
+                    container.appendChild(option);
                 });
-            });
-            
-            document.querySelectorAll('.remove-file-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => removeFile(e.currentTarget.getAttribute('data-file-id')));
-            });
-            
-            if (filesToProcess.length === 0) {
-                 fileListSection.classList.add('hidden');
-                 dropZone.classList.remove('hidden');
-                 batchDownloadSection.classList.add('hidden');
             }
-        };
-
-        const updateStatusUI = (fileWrapper) => {
-            const fileItem = document.getElementById(fileWrapper.id);
-            if (!fileItem) return;
-
-            const statusContainer = fileItem.querySelector('.status-container');
-            const langKey = translations[currentLang];
-
-            switch(fileWrapper.status) {
-                case 'waiting':
-                    statusContainer.innerHTML = `<span class="text-slate-400 text-sm font-medium">${langKey.status_waiting}</span>`;
-                    break;
-                case 'converting': case 'compressing': case 'resizing':
-                     statusContainer.innerHTML = `
-                        <div class="w-full bg-slate-700 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full progress-bar-inner" style="width: ${fileWrapper.progress}%"></div>
-                        </div>
-                        <span class="text-blue-300 text-sm font-medium">${fileWrapper.progress}%</span>`;
-                    break;
-                case 'completed':
-                    statusContainer.innerHTML = `
-                        <span class="text-green-400 font-semibold flex items-center gap-1">
-                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                            ${langKey.status_completed}
-                        </span>
-                        <button class="download-btn bg-green-500 text-white px-4 py-1 rounded-md text-sm font-semibold hover:bg-green-600">${langKey.download}</button>`;
-                    break;
-                case 'error':
-                    statusContainer.innerHTML = `<span class="text-red-400 font-semibold">${langKey.status_error}</span>`;
-                    break;
-            }
-        };
-
-        const removeFile = (fileId) => {
-            filesToProcess = filesToProcess.filter(f => f.id !== fileId);
-            renderFileList();
-        };
-
-        // --- YARDIMCI FONKSİYONLAR ---
-        const formatFileSize = (bytes) => {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        };
-        
-        const getFileExtension = (filename) => filename.slice((filename.lastIndexOf(".") - 1 >>> 0) + 2).toLowerCase();
-        
-        const getFileIcon = (ext) => {
-            let iconClass = "text-slate-400";
-            let iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>`;
-            switch (ext) {
-                case 'pdf': iconClass = "text-red-400"; break;
-                case 'docx': case 'doc': iconClass = "text-blue-400"; break;
-                case 'jpg': case 'jpeg': case 'png': case 'webp': case 'heic': iconClass = "text-yellow-400"; break;
-                case 'xlsx': case 'xls': case 'csv': iconClass = "text-green-400"; break;
-                case 'pptx': case 'ppt': iconClass = "text-orange-400"; break;
-                case 'mp4': case 'mov': case 'avi': case 'webm': iconClass = "text-rose-400"; iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18"></rect><line x1="7" y1="2" x2="7" y2="22"></line><line x1="17" y1="2" x2="17" y2="22"></line><line x1="2" y1="12" x2="22" y2="12"></line><line x1="2" y1="7" x2="7" y2="7"></line><line x1="2" y1="17" x2="7" y2="17"></line><line x1="17" y1="17" x2="22" y2="17"></line><line x1="17" y1="7" x2="22" y2="7"></line></svg>`; break;
-                case 'mp3': case 'wav': case 'm4a': iconClass = "text-cyan-400"; iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>`; break;
-                case 'zip': case 'rar': case '7z': iconClass = "text-lime-400"; iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.4 12.2a2.4 2.4 0 0 0-3.3 0L12 18.3l-6.1-6.1a2.4 2.4 0 0 0-3.3 0v0a2.4 2.4 0 0 0 0 3.3l7.8 7.8c.9.9 2.4.9 3.3 0l7.8-7.8a2.4 2.4 0 0 0 0-3.3Z"></path><path d="M12 2v10"></path><path d="M10 2H8"></path><path d="M16 2h-2"></path></svg>`; break;
-            }
-            return `<div class="${iconClass}">${iconSvg}</div>`;
-        };
-        
-        const getTargetFormats = (ext) => {
-            const formats = {
-                'docx': [{value: 'pdf', label: 'PDF'}, {value: 'odt', label: 'ODT'}],
-                'pdf': [{value: 'docx', label: 'DOCX'}, {value: 'txt', label: 'TXT'}, {value: 'compress', label: 'PDF Sıkıştır'}],
-                'jpg': [{value: 'png', label: 'PNG'}, {value: 'webp', label: 'WEBP'}, {value: 'compress', label: 'JPG Sıkıştır'}, {value: 'resize', label: 'Yeniden Boyutlandır'}],
-                'jpeg': [{value: 'png', label: 'PNG'}, {value: 'webp', label: 'WEBP'}, {value: 'compress', label: 'JPG Sıkıştır'}, {value: 'resize', label: 'Yeniden Boyutlandır'}],
-                'png': [{value: 'jpg', label: 'JPG'}, {value: 'webp', label: 'WEBP'}],
-                'heic': [{value: 'jpg', label: 'JPG'}],
-                'pptx': [{value: 'pdf', label: 'PDF'}],
-                'xlsx': [{value: 'csv', label: 'CSV'}, {value: 'pdf', label: 'PDF'}],
-                'mp4': [{value: 'mp3', label: 'MP3 (Ses Al)'}, {value: 'avi', label: 'AVI'}, {value: 'webm', label: 'WEBM'}, {value: 'compress', label: 'Video Sıkıştır'}],
-                'mov': [{value: 'mp4', label: 'MP4'}, {value: 'webm', label: 'WEBM'}, {value: 'compress', label: 'Video Sıkıştır'}],
-                'mp3': [{value: 'wav', label: 'WAV'}, {value: 'm4a', label: 'M4A'}],
-                'wav': [{value: 'mp3', label: 'MP3'}],
-                'zip': [{value: 'unzip', label: 'Arşivi Çıkart'}],
-                'rar': [{value: 'unrar', label: 'Arşivi Çıkart'}],
-                '7z': [{value: 'un7z', label: 'Arşivi Çıkart'}],
-            };
-            return formats[ext] || [];
-        };
-
-        // --- DÖNÜŞTÜRME SİMÜLASYONU ---
-        convertBtn.addEventListener('click', () => {
-            document.querySelectorAll('select, .remove-file-btn').forEach(el => el.disabled = true);
-            convertBtn.disabled = true;
-            convertBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            addMoreBtn.disabled = true;
-            addMoreBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            function loadTheme() { applyTheme(localStorage.getItem('appTheme') || 'light'); }
+            function loadFont() { applyFont(localStorage.getItem('appFont') || 'inter'); }
             
-            let completedCount = 0;
+            // --- Veri Yönetimi ---
+            function loadData() {
+                const storedData = localStorage.getItem('studentAppData');
+                if (storedData) appData = JSON.parse(storedData);
+                if (!appData.activeClass || !appData.classes.includes(appData.activeClass)) {
+                    appData.activeClass = appData.classes.length > 0 ? appData.classes[0] : null;
+                }
+                updateUI();
+            }
+            function saveData() { localStorage.setItem('studentAppData', JSON.stringify(appData)); }
+            function showToast(message, type = 'success') {
+                toast.textContent = message;
+                toast.className = `fixed bottom-5 right-5 text-white py-2 px-5 rounded-lg shadow-xl transition-all duration-300 z-50 ${type === 'success' ? 'bg-[var(--color-success)]' : 'bg-[var(--color-danger)]'}`;
+                toast.classList.remove('opacity-0', 'translate-y-10');
+                setTimeout(() => { toast.classList.add('opacity-0', 'translate-y-10'); }, 3000);
+            }
 
-            filesToProcess.forEach(fileWrapper => {
-                if (fileWrapper.status === 'waiting') {
-                    if (fileWrapper.targetFormat.includes('compress')) fileWrapper.status = 'compressing';
-                    else if (fileWrapper.targetFormat.includes('resize')) fileWrapper.status = 'resizing';
-                    else fileWrapper.status = 'converting';
+            // --- Arayüz Güncelleme ---
+            function updateUI() {
+                renderClasses();
+                renderDashboard();
+                renderStudents();
+                const hasClasses = appData.classes.length > 0;
+                studentSection.classList.toggle('hidden', !hasClasses);
+                emptyStateNoClass.classList.toggle('hidden', hasClasses);
+            }
+
+            function renderClasses() {
+                classTabsContainer.innerHTML = '';
+                appData.classes.forEach(className => {
+                    const tab = document.createElement('div');
+                    tab.className = `flex items-center gap-2 border-2 rounded-full px-4 py-2 text-sm font-semibold cursor-pointer transition ${className === appData.activeClass ? 'tab-active' : 'text-[var(--color-text-secondary)] border-transparent hover:bg-[var(--color-bg-hover)]'}`;
+                    tab.innerHTML = `<span>${className}</span><button data-class="${className}" class="delete-class-btn text-slate-400 hover:text-[var(--color-danger)] text-xs">&times;</button>`;
                     
-                    const interval = setInterval(() => {
-                        if (fileWrapper.progress < 100) {
-                            fileWrapper.progress += Math.floor(Math.random() * 10) + 5;
-                            if (fileWrapper.progress > 100) fileWrapper.progress = 100;
-                            updateStatusUI(fileWrapper);
-                        } else {
-                            clearInterval(interval);
-                            fileWrapper.status = 'completed';
-                            updateStatusUI(fileWrapper);
-                            
-                            completedCount++;
-                            if (completedCount === filesToProcess.length) {
-                                batchDownloadSection.classList.remove('hidden');
-                            }
+                    tab.addEventListener('click', (e) => { if (!e.target.classList.contains('delete-class-btn')) { appData.activeClass = className; saveData(); updateUI(); } });
+                    tab.querySelector('.delete-class-btn').addEventListener('click', async (e) => {
+                        e.stopPropagation();
+                        if (await openPromptModal({ title: `'${className}' Sınıfını Sil`, text: `Bu sınıfı ve içindeki tüm öğrencileri kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.`, confirmText: 'Evet, Sil', confirmClass: 'bg-[var(--color-danger)] hover:bg-[var(--color-danger-hover)]', showInput: false })) {
+                            deleteClass(className);
                         }
-                    }, 200);
+                    });
+                    classTabsContainer.appendChild(tab);
+                });
+            }
+
+            function renderDashboard() {
+                if (!appData.activeClass) { statsDashboard.innerHTML = ''; return; }
+                const students = appData.students[appData.activeClass] || [];
+                const totalStudents = students.length;
+                const totalPluses = students.reduce((acc, s) => acc + s.pluses.length, 0);
+                const totalMinuses = students.reduce((acc, s) => acc + s.minuses.length, 0);
+
+                statsDashboard.innerHTML = `
+                    <div class="bg-[var(--color-bg-secondary)] p-4 rounded-lg shadow-sm flex items-center gap-4"><div class="w-10 h-10 flex items-center justify-center bg-[var(--color-accent-primary-faded)] text-[var(--color-accent-primary)] rounded-full"><i class="fas fa-users"></i></div><div><div class="text-sm text-[var(--color-text-secondary)]">Toplam Öğrenci</div><div class="text-2xl font-bold text-[var(--color-text-title)]">${totalStudents}</div></div></div>
+                    <div class="bg-[var(--color-bg-secondary)] p-4 rounded-lg shadow-sm flex items-center gap-4"><div class="w-10 h-10 flex items-center justify-center bg-[var(--color-success-faded)] text-[var(--color-success)] rounded-full"><i class="fas fa-plus-circle"></i></div><div><div class="text-sm text-[var(--color-text-secondary)]">Toplam Artı</div><div class="text-2xl font-bold text-[var(--color-text-title)]">${totalPluses}</div></div></div>
+                    <div class="bg-[var(--color-bg-secondary)] p-4 rounded-lg shadow-sm flex items-center gap-4"><div class="w-10 h-10 flex items-center justify-center bg-[var(--color-danger-faded)] text-[var(--color-danger)] rounded-full"><i class="fas fa-minus-circle"></i></div><div><div class="text-sm text-[var(--color-text-secondary)]">Toplam Eksi</div><div class="text-2xl font-bold text-[var(--color-text-title)]">${totalMinuses}</div></div></div>
+                `;
+            }
+
+            function renderStudents() {
+                studentList.innerHTML = '';
+                if (!appData.activeClass) return;
+                
+                activeClassNameForm.textContent = appData.activeClass;
+                let students = appData.students[appData.activeClass] || [];
+
+                // Filter
+                const searchTerm = searchStudentInput.value.toLowerCase();
+                if (searchTerm) {
+                    students = students.filter(s => s.name.toLowerCase().includes(searchTerm));
+                }
+                
+                // Sort
+                const sortValue = sortStudentsSelect.value;
+                students.sort((a, b) => {
+                    switch (sortValue) {
+                        case 'name-asc': return a.name.localeCompare(b.name);
+                        case 'name-desc': return b.name.localeCompare(a.name);
+                        case 'plus-desc': return b.pluses.length - a.pluses.length;
+                        case 'minus-desc': return b.minuses.length - a.minuses.length;
+                        default: return 0;
+                    }
+                });
+
+                if (students.length === 0) {
+                    studentList.innerHTML = `<div class="text-center py-10 px-6 bg-[var(--color-bg-secondary)] rounded-xl shadow-sm col-span-full"><svg class="mx-auto h-12 w-12 text-[var(--color-text-secondary)]" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.166 1.318m5.754-7.728A4.486 4.486 0 0012.016 7a4.486 4.486 0 00-3.166 1.318m5.754 0a4.488 4.488 0 013.166 1.318m-5.754 0a4.488 4.488 0 00-3.166-1.318m0 0A4.486 4.486 0 006.834 15a4.486 4.486 0 00-3.166 1.318m0 0A4.488 4.488 0 01.5 12.5a4.488 4.488 0 013.166-1.318m0 0A4.486 4.486 0 018.166 7a4.486 4.486 0 013.166 1.318m0 0a4.488 4.488 0 013.166-1.318m-3.166 0a4.488 4.488 0 003.166 1.318m0 0A4.486 4.486 0 0021.166 15a4.486 4.486 0 00-3.166-1.318m0 0a4.488 4.488 0 00-3.166-1.318" /></svg><h3 class="mt-2 text-lg font-medium text-[var(--color-text-title)]">Öğrenci bulunamadı</h3><p class="mt-1 text-sm text-[var(--color-text-secondary)]">${searchStudentInput.value ? 'Arama kriterlerinizi değiştirin veya' : ''} yukarıdan yeni bir öğrenci ekleyin.</p></div>`;
+                    return;
+                }
+                
+                students.forEach(student => {
+                    const studentCard = document.createElement('div');
+                    studentCard.className = `student-card bg-[var(--color-bg-secondary)] p-5 rounded-xl shadow-md cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-300 relative ${student.isStarred ? 'starred' : ''}`;
+                    studentCard.dataset.id = student.id;
+                    studentCard.innerHTML = `
+                        <button class="star-btn absolute top-3 right-3 text-lg ${student.isStarred ? 'text-[var(--color-star)]' : 'text-[var(--color-text-secondary)]'} hover:text-[var(--color-star)] transition"><i class="${student.isStarred ? 'fas' : 'far'} fa-star"></i></button>
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-full bg-[var(--color-accent-primary-faded)] flex items-center justify-center text-[var(--color-accent-primary)] font-bold text-xl">${student.name.split(' ').map(n => n[0]).join('').toUpperCase()}</div>
+                            <div class="flex-grow"><h3 class="font-semibold text-lg text-[var(--color-text-title)]">${student.name}</h3><div class="flex gap-4 text-sm mt-1"><span class="text-[var(--color-success)] font-medium"><i class="fas fa-plus-circle mr-1"></i>${student.pluses.length}</span><span class="text-[var(--color-danger)] font-medium"><i class="fas fa-minus-circle mr-1"></i>${student.minuses.length}</span></div></div>
+                        </div>`;
+                    studentCard.querySelector('.star-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleStar(student.id); });
+                    studentCard.addEventListener('click', () => openStudentModal(student.id));
+                    studentList.appendChild(studentCard);
+                });
+            }
+            
+            function deleteClass(className) {
+                delete appData.students[className];
+                appData.classes = appData.classes.filter(c => c !== className);
+                if (appData.activeClass === className) appData.activeClass = appData.classes.length > 0 ? appData.classes[0] : null;
+                saveData(); updateUI(); showToast(`'${className}' sınıfı silindi.`, 'error');
+            }
+
+            function toggleStar(studentId) {
+                const student = (appData.students[appData.activeClass] || []).find(s => s.id === studentId);
+                if (student) { student.isStarred = !student.isStarred; saveData(); renderStudents(); }
+            }
+
+            // --- Modal İşlevleri ---
+            function getCurrentStudent() {
+                return (appData.students[appData.activeClass] || []).find(s => s.id === currentStudentId);
+            }
+            function openStudentModal(studentId) {
+                currentStudentId = studentId;
+                const student = getCurrentStudent();
+                if (!student) return;
+                modalStudentName.textContent = student.name;
+                notesTextarea.value = student.notes;
+                updateModalLists(student);
+                studentModal.classList.remove('hidden'); studentModal.classList.add('flex');
+                setTimeout(() => studentModalContent.classList.remove('scale-95', 'opacity-0'), 10);
+            }
+            function updateModalLists(student){
+                if(!student) return;
+                plusCount.textContent = student.pluses.length;
+                minusCount.textContent = student.minuses.length;
+                const generateList = (list, type) => {
+                    list.innerHTML = '';
+                    student[type].forEach((item, index) => {
+                        const date = new Date(item.date).toLocaleDateString('tr-TR');
+                        const li = document.createElement('li');
+                        li.className = `bg-[var(--color-${type === 'pluses' ? 'success' : 'danger'}-faded)] text-[var(--color-${type === 'pluses' ? 'success' : 'danger'})] p-2 rounded`;
+                        li.innerHTML = `<div class="flex justify-between items-start"><span>${item.reason}</span> <button data-index="${index}" class="remove-${type}-btn hover:brightness-75 leading-none">&times;</button></div><div class="text-xs text-[var(--color-text-secondary)] mt-1">${date}</div>`;
+                        list.appendChild(li);
+                    });
+                };
+                generateList(plusList, 'pluses');
+                generateList(minusList, 'minuses');
+            }
+            function closeStudentModal() {
+                studentModalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => { studentModal.classList.add('hidden'); studentModal.classList.remove('flex'); }, 300);
+            }
+            function openPromptModal({ title, text = '', confirmText, confirmClass, showInput = true, placeholder = '' }) {
+                promptModalTitle.textContent = title;
+                promptModalText.textContent = text;
+                promptModalConfirmBtn.textContent = confirmText;
+                promptModalConfirmBtn.className = `text-white font-semibold py-2 px-4 rounded-lg transition ${confirmClass || 'bg-[var(--color-accent-primary)] hover:bg-[var(--color-accent-primary-hover)]'}`;
+                promptModalInput.style.display = showInput ? 'block' : 'none';
+                promptModalInput.value = '';
+                promptModalInput.placeholder = placeholder;
+                promptModal.classList.remove('hidden'); promptModal.classList.add('flex');
+                setTimeout(() => promptModalContent.classList.remove('scale-95', 'opacity-0'), 10);
+                return new Promise(resolve => { modalResolver = resolve; });
+            }
+            function closePromptModal() {
+                promptModalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => { promptModal.classList.add('hidden'); promptModal.classList.remove('flex'); }, 300);
+            }
+
+            // --- Olay Dinleyicileri ---
+            themeSelectorBtn.addEventListener('click', () => themeOptions.classList.toggle('hidden'));
+            fontSelectorBtn.addEventListener('click', () => fontOptions.classList.toggle('hidden'));
+            document.addEventListener('click', (e) => {
+                if (!themeSelectorContainer.contains(e.target)) themeOptions.classList.add('hidden');
+                if (!fontSelectorContainer.contains(e.target)) fontOptions.classList.add('hidden');
+            });
+
+            addClassForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newClassName = classNameInput.value.trim();
+                if (newClassName && !appData.classes.includes(newClassName)) {
+                    appData.classes.push(newClassName);
+                    appData.students[newClassName] = [];
+                    appData.activeClass = newClassName;
+                    saveData(); updateUI(); classNameInput.value = ''; showToast(`'${newClassName}' sınıfı oluşturuldu!`, 'success');
+                } else if (appData.classes.includes(newClassName)) {
+                    showToast('Bu sınıf zaten mevcut!', 'error');
                 }
             });
-        });
 
+            addStudentForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const studentName = studentNameInput.value.trim();
+                if (studentName && appData.activeClass) {
+                    const newStudent = { id: Date.now(), name: studentName, pluses: [], minuses: [], notes: '', isStarred: false };
+                    if (!appData.students[appData.activeClass]) appData.students[appData.activeClass] = [];
+                    appData.students[appData.activeClass].push(newStudent);
+                    saveData(); renderStudents(); renderDashboard(); studentNameInput.value = ''; showToast(`${studentName} eklendi!`, 'success');
+                }
+            });
+
+            searchStudentInput.addEventListener('input', renderStudents);
+            sortStudentsSelect.addEventListener('change', renderStudents);
+            
+            closeModalBtn.addEventListener('click', closeStudentModal);
+            studentModal.addEventListener('click', (e) => { if (e.target === studentModal) closeStudentModal(); });
+
+            const addPlusMinus = async (type) => {
+                const isPlus = type === 'pluses';
+                const reason = await openPromptModal({ title: isPlus ? 'Artı Ekle' : 'Eksi Ekle', confirmText: 'Ekle', placeholder: `${isPlus ? 'Artı' : 'Eksi'} ekleme nedeniniz...`, confirmClass: isPlus ? '' : 'bg-[var(--color-danger)] hover:bg-[var(--color-danger-hover)]' });
+                if (reason && reason.trim()) {
+                    const student = getCurrentStudent();
+                    if(student) {
+                        student[type].push({ reason: reason.trim(), date: new Date().toISOString() });
+                        saveData(); updateModalLists(student); renderStudents(); renderDashboard();
+                    }
+                }
+            };
+            addPlusBtn.addEventListener('click', () => addPlusMinus('pluses'));
+            addMinusBtn.addEventListener('click', () => addPlusMinus('minuses'));
+
+            promptModalConfirmBtn.addEventListener('click', () => {
+                const isInputVisible = promptModalInput.style.display !== 'none';
+                if (modalResolver) modalResolver(isInputVisible ? promptModalInput.value : true);
+                closePromptModal();
+            });
+            promptModalCancelBtn.addEventListener('click', () => { if (modalResolver) modalResolver(null); closePromptModal(); });
+
+            const removePlusMinus = (e, type) => {
+                const btn = e.target.closest(`.remove-${type}-btn`);
+                if(btn) {
+                    const index = btn.dataset.index;
+                    const student = getCurrentStudent();
+                    student[type].splice(index, 1);
+                    saveData(); updateModalLists(student); renderStudents(); renderDashboard();
+                }
+            };
+            plusList.addEventListener('click', (e) => removePlusMinus(e, 'pluses'));
+            minusList.addEventListener('click', (e) => removePlusMinus(e, 'minuses'));
+
+            saveNotesBtn.addEventListener('click', () => {
+                const student = getCurrentStudent();
+                if(student) { student.notes = notesTextarea.value.trim(); saveData(); showToast('Notlar kaydedildi!', 'success'); }
+            });
+            
+            deleteStudentBtn.addEventListener('click', async () => {
+                const student = getCurrentStudent();
+                if (student && await openPromptModal({ title: `'${student.name}' Silinsin mi?`, text: `Bu öğrenciyi kalıcı olarak silmek istediğinizden emin misiniz?`, confirmText: 'Evet, Sil', confirmClass: 'bg-[var(--color-danger)] hover:bg-[var(--color-danger-hover)]', showInput: false })) {
+                    appData.students[appData.activeClass] = appData.students[appData.activeClass].filter(s => s.id !== currentStudentId);
+                    saveData(); renderStudents(); renderDashboard(); closeStudentModal(); showToast(`${student.name} silindi.`, 'error');
+                }
+            });
+
+            exportDataBtn.addEventListener('click', () => {
+                const dataStr = JSON.stringify(appData, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                const exportFileDefaultName = 'ogrenci-degerlendirme-yedek.json';
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+                showToast('Veriler dışa aktarıldı!', 'success');
+            });
+
+            importDataBtn.addEventListener('click', () => importFileInput.click());
+            importFileInput.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                if (!file) return;
+                const text = await file.text();
+                try {
+                    const importedData = JSON.parse(text);
+                    if (importedData.classes && importedData.students) {
+                        if(await openPromptModal({title: 'Verileri İçe Aktar', text: 'Mevcut tüm verilerinizin üzerine yazılacaktır. Bu işlem geri alınamaz. Onaylıyor musunuz?', confirmText: 'Evet, Onaylıyorum', showInput: false})) {
+                            appData = importedData;
+                            appData.activeClass = appData.classes[0] || null;
+                            saveData(); loadData(); showToast('Veriler başarıyla içe aktarıldı!', 'success');
+                        }
+                    } else { throw new Error('Geçersiz dosya formatı'); }
+                } catch (error) {
+                    showToast('Veriler içe aktarılamadı. Dosya bozuk olabilir.', 'error');
+                }
+                importFileInput.value = ''; // Reset for same-file import
+            });
+
+            // Başlangıç
+            loadTheme();
+            loadFont();
+            renderOptions(themeOptions, themes, applyTheme);
+            renderOptions(fontOptions, fonts, applyFont);
+            loadData();
+        });
     </script>
 </body>
 </html>
