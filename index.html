@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lato:wght@400;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: var(--font-family, 'Inter', sans-serif);
@@ -148,6 +149,9 @@
 
         <!-- Ayarlar Butonları -->
         <div class="absolute top-2 right-2 sm:top-4 md:right-8 flex items-center gap-2 z-10">
+             <button id="countdown-btn" class="w-10 h-10 bg-[var(--color-bg-secondary)] rounded-full shadow-md flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-accent-primary)] transition" title="Okulların Kapanmasına Kalan Süre">
+                <i class="fas fa-calendar-day"></i>
+            </button>
             <div class="relative" id="font-selector-container">
                 <button id="font-selector-btn" class="w-10 h-10 bg-[var(--color-bg-secondary)] rounded-full shadow-md flex items-center justify-center text-[var(--color-text-secondary)] hover:text-[var(--color-accent-primary)] transition" title="Yazı Tipini Değiştir">
                     <i class="fas fa-font"></i>
@@ -196,12 +200,12 @@
                         <span>Öğrenci Ekle</span>
                     </button>
                 </form>
-                <div class="border-t border-[var(--color-border)] pt-4 flex flex-col sm:flex-row gap-4 items-center">
-                    <div class="relative flex-grow w-full">
+                <div class="border-t border-[var(--color-border)] pt-4 flex flex-wrap gap-4 items-center">
+                    <div class="relative flex-grow min-w-[200px]">
                         <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)]"></i>
                         <input type="text" id="search-student-input" placeholder="Öğrenci Ara..." class="w-full p-3 pl-12 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition-all duration-300">
                     </div>
-                    <div class="relative w-full sm:w-auto">
+                    <div class="relative flex-shrink-0">
                         <select id="sort-students-select" class="w-full appearance-none p-3 pr-10 bg-[var(--color-bg-primary)] border border-[var(--color-border)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent-primary)] focus:outline-none transition-all duration-300">
                             <option value="name-asc">İsme Göre (A-Z)</option>
                             <option value="name-desc">İsme Göre (Z-A)</option>
@@ -210,6 +214,10 @@
                         </select>
                          <i class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] pointer-events-none"></i>
                     </div>
+                    <button id="show-report-btn" class="flex-shrink-0 p-3 bg-[var(--color-accent-secondary)] text-white rounded-lg hover:bg-[var(--color-accent-secondary-hover)] transition-all duration-300 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                        <i class="fas fa-chart-pie"></i>
+                        <span>Raporlar</span>
+                    </button>
                 </div>
             </div>
             <div id="student-list-container">
@@ -280,6 +288,58 @@
         </div>
     </div>
 
+    <!-- Raporlama Modalı -->
+    <div id="report-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-[var(--color-bg-secondary)] rounded-2xl shadow-2xl w-full max-w-4xl transform transition-all duration-300 scale-95 opacity-0 modal-content overflow-y-auto">
+            <div class="p-6 md:p-8">
+                <div class="flex justify-between items-start mb-6">
+                    <h2 class="text-xl sm:text-2xl font-bold text-[var(--color-text-title)] flex items-center gap-3"><i class="fas fa-chart-pie text-[var(--color-accent-secondary)]"></i>Sınıf Raporu: <span id="report-class-name"></span></h2>
+                    <button id="close-report-modal-btn" class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-2xl leading-none">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="bg-[var(--color-bg-hover)] p-5 rounded-xl">
+                        <h3 class="font-semibold text-lg text-[var(--color-text-title)] mb-4 text-center">Genel Durum</h3>
+                        <div class="max-w-xs mx-auto">
+                             <canvas id="classSummaryChart"></canvas>
+                        </div>
+                        <div id="summary-text" class="text-center mt-4 text-sm text-[var(--color-text-secondary)]"></div>
+                    </div>
+                    <div class="bg-[var(--color-bg-hover)] p-5 rounded-xl">
+                        <h3 class="font-semibold text-lg text-[var(--color-text-title)] mb-4 text-center">Öğrenci Net Puan Sıralaması</h3>
+                        <canvas id="studentRankChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-[var(--color-bg-hover)] p-5 rounded-xl mt-8">
+                     <h3 class="font-semibold text-lg text-[var(--color-text-title)] mb-4 text-center">Artı/Eksi Zaman Çizelgesi (Son 30 Gün)</h3>
+                     <canvas id="timelineChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Geri Sayım Modalı -->
+    <div id="countdown-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
+        <div id="countdown-modal-content" class="bg-[var(--color-bg-secondary)] rounded-2xl shadow-2xl w-full max-w-lg transform transition-all duration-300 scale-95 opacity-0 text-center p-8">
+            <div class="flex justify-between items-center mb-4">
+                <span class="w-8"></span> <!-- Boşluk için -->
+                <h2 class="text-xl sm:text-2xl font-bold text-[var(--color-text-title)] flex items-center gap-3"><i class="fas fa-hourglass-half text-[var(--color-accent-secondary)]"></i>Yaz Tatiline Son</h2>
+                <button id="close-countdown-modal-btn" class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-2xl leading-none">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <p class="text-[var(--color-text-secondary)] mb-6">Okulların kapanış tarihi: 20 Haziran 2025</p>
+            <div id="countdown-timer" class="grid grid-cols-4 gap-4">
+                <div><div id="days" class="text-4xl md:text-6xl font-bold text-[var(--color-accent-primary)]">0</div><div class="text-sm text-[var(--color-text-secondary)] mt-1">Gün</div></div>
+                <div><div id="hours" class="text-4xl md:text-6xl font-bold text-[var(--color-accent-primary)]">0</div><div class="text-sm text-[var(--color-text-secondary)] mt-1">Saat</div></div>
+                <div><div id="minutes" class="text-4xl md:text-6xl font-bold text-[var(--color-accent-primary)]">0</div><div class="text-sm text-[var(--color-text-secondary)] mt-1">Dakika</div></div>
+                <div><div id="seconds" class="text-4xl md:text-6xl font-bold text-[var(--color-accent-primary)]">0</div><div class="text-sm text-[var(--color-text-secondary)] mt-1">Saniye</div></div>
+            </div>
+        </div>
+    </div>
+
+
     <div id="toast" class="fixed bottom-5 right-5 bg-green-500 text-white py-2 px-5 rounded-lg shadow-xl opacity-0 transform translate-y-10 transition-all duration-300 z-50"></div>
 
     <script>
@@ -336,12 +396,36 @@
             const promptModalCancelBtn = getEl('prompt-modal-cancel-btn');
             const promptModalConfirmBtn = getEl('prompt-modal-confirm-btn');
             let modalResolver;
+            
+            const showReportBtn = getEl('show-report-btn');
+            const reportModal = getEl('report-modal');
+            const closeReportModalBtn = getEl('close-report-modal-btn');
+            const reportClassName = getEl('report-class-name');
+            let classSummaryChart, studentRankChart, timelineChart;
+            
+            const countdownBtn = getEl('countdown-btn');
+            const countdownModal = getEl('countdown-modal');
+            const countdownModalContent = getEl('countdown-modal-content');
+            const closeCountdownModalBtn = getEl('close-countdown-modal-btn');
+            let countdownInterval;
 
             let appData = { classes: [], students: {}, activeClass: null };
             let currentStudentId = null;
 
-            function applyTheme(themeId) { document.documentElement.setAttribute('data-theme', themeId); localStorage.setItem('appTheme', themeId); }
-            function applyFont(fontId) { document.documentElement.setAttribute('data-font', fontId); localStorage.setItem('appFont', fontId); }
+            function applyTheme(themeId) {
+                document.documentElement.setAttribute('data-theme', themeId);
+                localStorage.setItem('appTheme', themeId);
+                if (!reportModal.classList.contains('hidden')) {
+                    setTimeout(renderAllCharts, 50);
+                }
+            }
+            function applyFont(fontId) {
+                document.documentElement.setAttribute('data-font', fontId);
+                localStorage.setItem('appFont', fontId);
+                if (!reportModal.classList.contains('hidden')) {
+                    setTimeout(renderAllCharts, 50);
+                }
+            }
             function renderOptions(container, items, callback) {
                 container.innerHTML = '';
                 items.forEach(item => {
@@ -528,6 +612,205 @@
                 setTimeout(() => { promptModal.classList.add('hidden'); }, 300);
             }
 
+            // --- Raporlama Fonksiyonları ---
+            function destroyCharts() {
+                if (classSummaryChart) classSummaryChart.destroy();
+                if (studentRankChart) studentRankChart.destroy();
+                if (timelineChart) timelineChart.destroy();
+            }
+
+            function renderAllCharts() {
+                destroyCharts();
+                if (!appData.activeClass) return;
+
+                reportClassName.textContent = appData.activeClass;
+                const students = appData.students[appData.activeClass] || [];
+                
+                renderClassSummaryChart(students);
+                renderStudentRankChart(students);
+                renderTimelineChart(students);
+            }
+
+            function renderClassSummaryChart(students) {
+                const totalPluses = students.reduce((acc, s) => acc + s.pluses.length, 0);
+                const totalMinuses = students.reduce((acc, s) => acc + s.minuses.length, 0);
+                const ctx = getEl('classSummaryChart').getContext('2d');
+
+                getEl('summary-text').innerHTML = `Sınıfın toplamda <strong>${totalPluses}</strong> artısı ve <strong>${totalMinuses}</strong> eksisi bulunmaktadır. Net puan: <strong>${totalPluses - totalMinuses}</strong>`;
+
+                classSummaryChart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Artılar', 'Eksiler'],
+                        datasets: [{
+                            data: [totalPluses, totalMinuses],
+                            backgroundColor: [
+                                getComputedStyle(document.documentElement).getPropertyValue('--color-success'),
+                                getComputedStyle(document.documentElement).getPropertyValue('--color-danger')
+                            ],
+                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--color-bg-hover'),
+                            borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'top', labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary') } } }
+                    }
+                });
+            }
+
+            function renderStudentRankChart(students) {
+                const sortedStudents = [...students].sort((a, b) => (b.pluses.length - b.minuses.length) - (a.pluses.length - a.minuses.length));
+                const ctx = getEl('studentRankChart').getContext('2d');
+                
+                studentRankChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: sortedStudents.map(s => s.name),
+                        datasets: [{
+                            label: 'Net Puan',
+                            data: sortedStudents.map(s => s.pluses.length - s.minuses.length),
+                            backgroundColor: sortedStudents.map(s => (s.pluses.length - s.minuses.length) >= 0 ? getComputedStyle(document.documentElement).getPropertyValue('--color-success') : getComputedStyle(document.documentElement).getPropertyValue('--color-danger')),
+                            borderWidth: 1,
+                            borderColor: getComputedStyle(document.documentElement).getPropertyValue('--color-bg-hover'),
+                        }]
+                    },
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            y: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary') } },
+                            x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary') } }
+                        }
+                    }
+                });
+            }
+
+            function renderTimelineChart(students) {
+                const data = { pluses: {}, minuses: {} };
+                const today = new Date();
+                const thirtyDaysAgo = new Date(new Date().setDate(today.getDate() - 30));
+
+                students.forEach(student => {
+                    student.pluses.forEach(p => {
+                        const date = new Date(p.date);
+                        if (date >= thirtyDaysAgo) {
+                            const day = date.toISOString().split('T')[0];
+                            data.pluses[day] = (data.pluses[day] || 0) + 1;
+                        }
+                    });
+                    student.minuses.forEach(m => {
+                         const date = new Date(m.date);
+                        if (date >= thirtyDaysAgo) {
+                            const day = date.toISOString().split('T')[0];
+                            data.minuses[day] = (data.minuses[day] || 0) + 1;
+                        }
+                    });
+                });
+
+                const labels = [];
+                for (let i = 29; i >= 0; i--) {
+                    const d = new Date();
+                    d.setDate(d.getDate() - i);
+                    labels.push(d.toISOString().split('T')[0]);
+                }
+
+                const plusData = labels.map(day => data.pluses[day] || 0);
+                const minusData = labels.map(day => data.minuses[day] || 0);
+
+                const ctx = getEl('timelineChart').getContext('2d');
+                timelineChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels.map(l => new Date(l).toLocaleDateString('tr-TR', {day: 'numeric', month: 'short'})),
+                        datasets: [
+                            {
+                                label: 'Artılar',
+                                data: plusData,
+                                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--color-success'),
+                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--color-success').replace(')', ', 0.1)'),
+                                fill: true,
+                                tension: 0.3
+                            },
+                            {
+                                label: 'Eksiler',
+                                data: minusData,
+                                borderColor: getComputedStyle(document.documentElement).getPropertyValue('--color-danger'),
+                                backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--color-danger').replace(')', ', 0.1)'),
+                                fill: true,
+                                tension: 0.3
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: { legend: { position: 'top', labels: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary') } } },
+                        scales: {
+                            y: { beginAtZero: true, ticks: { stepSize: 1, color: getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary') } },
+                            x: { ticks: { color: getComputedStyle(document.documentElement).getPropertyValue('--color-text-secondary') } }
+                        }
+                    }
+                });
+            }
+
+            function openReportModal() {
+                reportModal.classList.remove('hidden');
+                setTimeout(() => {
+                    reportModal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0');
+                    renderAllCharts();
+                }, 10);
+            }
+
+            function closeReportModal() {
+                reportModal.querySelector('.modal-content').classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    reportModal.classList.add('hidden');
+                    destroyCharts();
+                }, 300);
+            }
+
+             // --- Geri Sayım Fonksiyonları ---
+            function startCountdown() {
+                const schoolCloseDate = new Date('2025-06-20T23:59:59').getTime();
+                
+                countdownInterval = setInterval(() => {
+                    const now = new Date().getTime();
+                    const distance = schoolCloseDate - now;
+
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    getEl('days').innerText = days < 10 ? '0' + days : days;
+                    getEl('hours').innerText = hours < 10 ? '0' + hours : hours;
+                    getEl('minutes').innerText = minutes < 10 ? '0' + minutes : minutes;
+                    getEl('seconds').innerText = seconds < 10 ? '0' + seconds : seconds;
+
+                    if (distance < 0) {
+                        clearInterval(countdownInterval);
+                         getEl('countdown-timer').innerHTML = "<p class='col-span-4 text-xl font-bold text-[var(--color-success)]'>İyi tatiller!</p>";
+                    }
+                }, 1000);
+            }
+
+            function openCountdownModal() {
+                countdownModal.classList.remove('hidden');
+                setTimeout(() => {
+                    countdownModalContent.classList.remove('scale-95', 'opacity-0');
+                    startCountdown();
+                }, 10);
+            }
+
+            function closeCountdownModal() {
+                countdownModalContent.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => {
+                    countdownModal.classList.add('hidden');
+                    clearInterval(countdownInterval);
+                }, 300);
+            }
+
             // --- Olay Dinleyicileri ---
             themeSelectorBtn.addEventListener('click', () => themeOptions.classList.toggle('hidden'));
             fontSelectorBtn.addEventListener('click', () => fontOptions.classList.toggle('hidden'));
@@ -570,6 +853,14 @@
             
             closeModalBtn.addEventListener('click', closeStudentModal);
             studentModal.addEventListener('click', (e) => { if (e.target === studentModal) closeStudentModal(); });
+
+            showReportBtn.addEventListener('click', openReportModal);
+            closeReportModalBtn.addEventListener('click', closeReportModal);
+            reportModal.addEventListener('click', (e) => { if(e.target === reportModal) closeReportModal(); });
+
+            countdownBtn.addEventListener('click', openCountdownModal);
+            closeCountdownModalBtn.addEventListener('click', closeCountdownModal);
+            countdownModal.addEventListener('click', (e) => { if(e.target === countdownModal) closeCountdownModal(); });
 
             const addPlusMinus = async (type) => {
                 const isPlus = type === 'pluses';
