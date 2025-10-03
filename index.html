@@ -296,7 +296,7 @@
     <!-- Raporlama Modalı -->
     <div id="report-modal" class="fixed inset-0 bg-black/70 flex items-center justify-center hidden z-50 p-4">
         <div class="bg-[var(--color-bg-secondary)] rounded-2xl shadow-2xl w-full max-w-4xl transform transition-all duration-300 scale-95 opacity-0 modal-content overflow-y-auto">
-            <div class="p-6 md:p-8">
+            <div id="pdf-content" class="p-6 md:p-8">
                 <div class="flex justify-between items-start mb-6">
                     <h2 class="text-xl sm:text-2xl font-bold text-[var(--color-text-title)] flex items-center gap-3"><i class="fas fa-chart-pie text-[var(--color-accent-secondary)]"></i>Sınıf Raporu: <span id="report-class-name"></span></h2>
                     <button id="close-report-modal-btn" class="text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] text-2xl leading-none">
@@ -414,6 +414,7 @@
             const reportModal = getEl('report-modal');
             const closeReportModalBtn = getEl('close-report-modal-btn');
             const reportClassName = getEl('report-class-name');
+            const pdfContent = getEl('pdf-content');
             const exportPdfBtn = getEl('export-pdf-btn');
             const exportCsvBtn = getEl('export-csv-btn');
             let classSummaryChart, studentRankChart, timelineChart;
@@ -1008,78 +1009,22 @@
             exportPdfBtn.addEventListener('click', () => {
                 if (!appData.activeClass) return;
                 showToast('PDF oluşturuluyor, lütfen bekleyin...', 'success');
+                const elementToPrint = getEl('pdf-content').cloneNode(true);
+                elementToPrint.style.padding = '0';
 
-                const students = appData.students[appData.activeClass] || [];
-                const totalStudents = students.length;
-                const totalPluses = students.reduce((acc, s) => acc + s.pluses.length, 0);
-                const totalMinuses = students.reduce((acc, s) => acc + s.minuses.length, 0);
-                const today = new Date().toLocaleDateString('tr-TR');
-
-                let reportHtml = `
-                    <div style="font-family: Arial, sans-serif; margin: 20px;">
-                        <h1 style="font-size: 24px; text-align: center;">${appData.activeClass} Sınıf Raporu</h1>
-                        <p style="text-align: center; font-size: 12px; color: #555;">Tarih: ${today}</p>
-                        <br/>
-                        <h2 style="font-size: 18px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Genel Bakış</h2>
-                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;">
-                            <thead>
-                                <tr style="background-color: #f2f2f2;">
-                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Toplam Öğrenci</th>
-                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Toplam Artı</th>
-                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Toplam Eksi</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td style="padding: 8px; border: 1px solid #ddd;">${totalStudents}</td>
-                                    <td style="padding: 8px; border: 1px solid #ddd;">${totalPluses}</td>
-                                    <td style="padding: 8px; border: 1px solid #ddd;">${totalMinuses}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        <br/><br/>
-                        <h2 style="font-size: 18px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Öğrenci Detayları</h2>
-                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;">
-                            <thead>
-                                <tr style="background-color: #f2f2f2;">
-                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Öğrenci Adı</th>
-                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Artı</th>
-                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Eksi</th>
-                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Net Puan</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                `;
-
-                students.forEach(student => {
-                    reportHtml += `
-                        <tr>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${student.name}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${student.pluses.length}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${student.minuses.length}</td>
-                            <td style="padding: 8px; border: 1px solid #ddd;">${student.pluses.length - student.minuses.length}</td>
-                        </tr>
-                    `;
-                });
-
-                reportHtml += `
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-
-                const element = document.createElement('div');
-                element.innerHTML = reportHtml;
-                
                 const opt = {
-                    margin:       0.5,
-                    filename:     `${appData.activeClass}-ogrenci-raporu.pdf`,
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                    margin: 0.5,
+                    filename: `${appData.activeClass}-ogrenci-raporu.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, logging: false },
+                    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
                 };
+                
+                // Hide buttons for PDF output
+                const closeBtn = elementToPrint.querySelector('#close-report-modal-btn');
+                if(closeBtn) closeBtn.style.display = 'none';
 
-                html2pdf().from(element).set(opt).save();
+                html2pdf().from(elementToPrint).set(opt).save();
             });
 
             // Başlangıç
