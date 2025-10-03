@@ -225,7 +225,11 @@
             </div>
         </div>
          <div id="empty-state-no-class" class="text-center py-16 px-6 bg-[var(--color-bg-secondary)] rounded-2xl shadow-xl max-w-2xl mx-auto hidden">
-            <img src="https://placehold.co/128x128/E2E8F0/64748B?text=📚" alt="Kitaplar ikonu" class="mx-auto h-32 w-32 rounded-full mb-6 ring-4 ring-[var(--color-bg-hover)]">
+            <div class="mx-auto h-32 w-32 flex items-center justify-center rounded-full mb-6 bg-[var(--color-bg-hover)]">
+                <svg class="w-20 h-20 text-[var(--color-accent-secondary)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" />
+                </svg>
+            </div>
             <h3 class="mt-4 text-2xl font-bold text-[var(--color-text-title)]">Henüz Sınıf Yok</h3>
             <p class="mt-2 text-md text-[var(--color-text-secondary)] max-w-md mx-auto">Görünüşe göre henüz bir sınıf oluşturmadınız. Başlamak için aşağıdaki butonu kullanın.</p>
             <button id="add-first-class-btn" class="mt-6 bg-[var(--color-accent-secondary)] text-[var(--color-text-inverted)] font-semibold py-3 px-8 rounded-lg hover:bg-[var(--color-accent-secondary-hover)] transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-1">
@@ -329,7 +333,7 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <p class="text-[var(--color-text-secondary)] mb-6">Okulların kapanış tarihi: 20 Haziran 2025</p>
+            <p class="text-[var(--color-text-secondary)] mb-6">Okulların kapanış tarihi: 19 Haziran 2026</p>
             <div id="countdown-timer" class="grid grid-cols-4 gap-4">
                 <div><div id="days" class="text-4xl md:text-6xl font-bold text-[var(--color-accent-primary)]">0</div><div class="text-sm text-[var(--color-text-secondary)] mt-1">Gün</div></div>
                 <div><div id="hours" class="text-4xl md:text-6xl font-bold text-[var(--color-accent-primary)]">0</div><div class="text-sm text-[var(--color-text-secondary)] mt-1">Saat</div></div>
@@ -521,7 +525,15 @@
                 });
 
                 if (students.length === 0) {
-                    studentList.innerHTML = `<div class="text-center py-16 px-6 bg-[var(--color-bg-secondary)] rounded-2xl shadow-xl col-span-full"><img src="https://placehold.co/128x128/E2E8F0/64748B?text=🧑‍🎓" alt="Öğrenci ikonu" class="mx-auto h-32 w-32 rounded-full mb-6 ring-4 ring-[var(--color-bg-hover)]"><h3 class="mt-2 text-2xl font-bold text-[var(--color-text-title)]">Öğrenci Bulunamadı</h3><p class="mt-2 text-md text-[var(--color-text-secondary)] max-w-md mx-auto">${searchStudentInput.value ? 'Arama kriterlerinizi değiştirin veya' : ''} yukarıdan yeni bir öğrenci ekleyin.</p></div>`;
+                    studentList.innerHTML = `<div class="text-center py-16 px-6 bg-[var(--color-bg-secondary)] rounded-2xl shadow-xl col-span-full">
+                        <div class="mx-auto h-32 w-32 flex items-center justify-center rounded-full mb-6 bg-[var(--color-bg-hover)]">
+                           <svg class="w-20 h-20 text-[var(--color-accent-primary)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                             <path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m-7.5-2.962A3.75 3.75 0 0115 9.75c0-1.036-.44-1.99-1.175-2.675a3.75 3.75 0 00-5.65 0A3.75 3.75 0 006 9.75c0 1.036.44 1.99 1.175 2.675m1.5-5.05a3.75 3.75 0 00-5.65 0A3.75 3.75 0 006 9.75c0 1.036.44 1.99 1.175 2.675M12 15.75a3.75 3.75 0 01-2.675-.925" />
+                           </svg>
+                       </div>
+                        <h3 class="mt-2 text-2xl font-bold text-[var(--color-text-title)]">Öğrenci Bulunamadı</h3>
+                        <p class="mt-2 text-md text-[var(--color-text-secondary)] max-w-md mx-auto">${searchStudentInput.value ? 'Arama kriterlerinizi değiştirin veya' : ''} yukarıdan yeni bir öğrenci ekleyin.</p>
+                    </div>`;
                     return;
                 }
                 
@@ -531,12 +543,14 @@
                     studentCard.dataset.id = student.id;
                     studentCard.innerHTML = `
                         <button class="star-btn absolute top-4 right-4 text-xl ${student.isStarred ? 'text-[var(--color-star)]' : 'text-[var(--color-text-secondary)]'} hover:text-[var(--color-star)] transition-transform duration-200 hover:scale-125"><i class="${student.isStarred ? 'fas' : 'far'} fa-star"></i></button>
-                        <div class="flex flex-col items-center text-center p-6">
+                        <div class="flex flex-col items-center text-center p-6 pt-8">
                             <div class="w-20 h-20 mb-4 rounded-full bg-[var(--color-accent-primary-faded)] flex items-center justify-center text-[var(--color-accent-primary)] font-bold text-3xl ring-4 ring-[var(--color-bg-hover)]">${student.name.split(' ').map(n => n[0]).join('').toUpperCase()}</div>
-                            <h3 class="font-semibold text-lg text-[var(--color-text-title)]">${student.name}</h3>
-                            <div class="flex gap-4 text-sm mt-2">
-                                <span class="text-[var(--color-success)] font-medium"><i class="fas fa-plus-circle mr-1"></i>${student.pluses.length}</span>
-                                <span class="text-[var(--color-danger)] font-medium"><i class="fas fa-minus-circle mr-1"></i>${student.minuses.length}</span>
+                            <h3 class="font-semibold text-lg text-[var(--color-text-title)] truncate w-full" title="${student.name}">${student.name}</h3>
+                             <div class="w-full border-t border-[var(--color-border)] my-3"></div>
+                            <div class="flex justify-around items-center text-sm w-full">
+                                <span class="text-[var(--color-success)] font-medium flex flex-col items-center"><span class="font-bold text-lg">${student.pluses.length}</span><span class="text-xs">Artı</span></span>
+                                <span class="text-[var(--color-danger)] font-medium flex flex-col items-center"><span class="font-bold text-lg">${student.minuses.length}</span><span class="text-xs">Eksi</span></span>
+                                <span class="text-[var(--color-text-primary)] font-medium flex flex-col items-center"><span class="font-bold text-lg">${student.pluses.length - student.minuses.length}</span><span class="text-xs">Puan</span></span>
                             </div>
                         </div>`;
                     studentCard.querySelector('.star-btn').addEventListener('click', (e) => { e.stopPropagation(); toggleStar(student.id); });
@@ -772,7 +786,7 @@
 
              // --- Geri Sayım Fonksiyonları ---
             function startCountdown() {
-                const schoolCloseDate = new Date('2025-06-20T23:59:59').getTime();
+                const schoolCloseDate = new Date('2026-06-19T23:59:59').getTime();
                 
                 countdownInterval = setInterval(() => {
                     const now = new Date().getTime();
