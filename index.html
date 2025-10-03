@@ -10,6 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Lato:wght@400;700&family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         body {
             font-family: var(--font-family, 'Inter', sans-serif);
@@ -320,6 +321,14 @@
                      <canvas id="timelineChart"></canvas>
                 </div>
             </div>
+            <div class="bg-[var(--color-bg-hover)] p-4 md:p-6 mt-4 rounded-b-2xl flex flex-col sm:flex-row gap-3">
+                 <button id="export-pdf-btn" class="flex-1 bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition-all duration-300 flex items-center justify-center gap-2">
+                    <i class="fas fa-file-pdf"></i> PDF Olarak İndir
+                </button>
+                 <button id="export-csv-btn" class="flex-1 bg-green-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-700 transition-all duration-300 flex items-center justify-center gap-2">
+                    <i class="fas fa-file-csv"></i> Excel (CSV) Olarak İndir
+                </button>
+            </div>
         </div>
     </div>
     
@@ -333,7 +342,7 @@
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-            <p class="text-[var(--color-text-secondary)] mb-6">Okulların kapanış tarihi: 19 Haziran 2026</p>
+            <p id="countdown-end-date-text" class="text-[var(--color-text-secondary)] mb-6"></p>
             <div id="countdown-timer" class="grid grid-cols-4 gap-4">
                 <div><div id="days" class="text-4xl md:text-6xl font-bold text-[var(--color-accent-primary)]">0</div><div class="text-sm text-[var(--color-text-secondary)] mt-1">Gün</div></div>
                 <div><div id="hours" class="text-4xl md:text-6xl font-bold text-[var(--color-accent-primary)]">0</div><div class="text-sm text-[var(--color-text-secondary)] mt-1">Saat</div></div>
@@ -405,12 +414,15 @@
             const reportModal = getEl('report-modal');
             const closeReportModalBtn = getEl('close-report-modal-btn');
             const reportClassName = getEl('report-class-name');
+            const exportPdfBtn = getEl('export-pdf-btn');
+            const exportCsvBtn = getEl('export-csv-btn');
             let classSummaryChart, studentRankChart, timelineChart;
             
             const countdownBtn = getEl('countdown-btn');
             const countdownModal = getEl('countdown-modal');
             const countdownModalContent = getEl('countdown-modal-content');
             const closeCountdownModalBtn = getEl('close-countdown-modal-btn');
+            const countdownEndDateText = getEl('countdown-end-date-text');
             let countdownInterval;
 
             let appData = { classes: [], students: {}, activeClass: null };
@@ -785,12 +797,33 @@
             }
 
              // --- Geri Sayım Fonksiyonları ---
+            function getNextSchoolCloseDate() {
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                // MEB takvimine göre okullar genellikle Haziran'ın 2. veya 3. Cuma'sı kapanır.
+                // Gelecek yıllar için tahmini bir tarih belirleyelim.
+                let closeDate = new Date(currentYear, 5, 20); // Haziran 20
+                if (now > closeDate) {
+                    closeDate.setFullYear(currentYear + 1);
+                }
+                // Tarihi Cuma gününe ayarlayalım (Haziran'ın 3. Cuma'sı gibi)
+                closeDate = new Date(closeDate.getFullYear(), 5, 1);
+                while(closeDate.getDay() !== 5) { // 5 = Cuma
+                    closeDate.setDate(closeDate.getDate() + 1);
+                }
+                closeDate.setDate(closeDate.getDate() + 14); // 3. Cuma
+                closeDate.setHours(23, 59, 59);
+
+                return closeDate;
+            }
+            
             function startCountdown() {
-                const schoolCloseDate = new Date('2026-06-19T23:59:59').getTime();
-                
+                const schoolCloseDate = getNextSchoolCloseDate();
+                countdownEndDateText.textContent = `Okulların kapanış tarihi: ${schoolCloseDate.toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+
                 countdownInterval = setInterval(() => {
                     const now = new Date().getTime();
-                    const distance = schoolCloseDate - now;
+                    const distance = schoolCloseDate.getTime() - now;
 
                     const days = Math.floor(distance / (1000 * 60 * 60 * 24));
                     const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
@@ -948,6 +981,105 @@
                     } else { throw new Error('Geçersiz dosya formatı'); }
                 } catch (error) { showToast('Veriler içe aktarılamadı. Dosya bozuk olabilir.', 'error'); }
                 importFileInput.value = '';
+            });
+
+            exportCsvBtn.addEventListener('click', () => {
+                if (!appData.activeClass) return;
+                const students = appData.students[appData.activeClass] || [];
+                let csvContent = "data:text/csv;charset=utf-8,\uFEFF";
+                csvContent += "Öğrenci Adı,Artı Sayısı,Eksi Sayısı,Net Puan,Notlar\r\n";
+
+                students.forEach(student => {
+                    const notes = `"${student.notes.replace(/"/g, '""')}"`;
+                    const row = [student.name, student.pluses.length, student.minuses.length, student.pluses.length - student.minuses.length, notes].join(",");
+                    csvContent += row + "\r\n";
+                });
+
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `${appData.activeClass}-ogrenci-raporu.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                showToast('CSV dosyası indirildi!', 'success');
+            });
+
+            exportPdfBtn.addEventListener('click', () => {
+                if (!appData.activeClass) return;
+                showToast('PDF oluşturuluyor, lütfen bekleyin...', 'success');
+
+                const students = appData.students[appData.activeClass] || [];
+                const totalStudents = students.length;
+                const totalPluses = students.reduce((acc, s) => acc + s.pluses.length, 0);
+                const totalMinuses = students.reduce((acc, s) => acc + s.minuses.length, 0);
+                const today = new Date().toLocaleDateString('tr-TR');
+
+                let reportHtml = `
+                    <div style="font-family: Arial, sans-serif; margin: 20px;">
+                        <h1 style="font-size: 24px; text-align: center;">${appData.activeClass} Sınıf Raporu</h1>
+                        <p style="text-align: center; font-size: 12px; color: #555;">Tarih: ${today}</p>
+                        <br/>
+                        <h2 style="font-size: 18px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Genel Bakış</h2>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;">
+                            <thead>
+                                <tr style="background-color: #f2f2f2;">
+                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Toplam Öğrenci</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Toplam Artı</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Toplam Eksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">${totalStudents}</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">${totalPluses}</td>
+                                    <td style="padding: 8px; border: 1px solid #ddd;">${totalMinuses}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <br/><br/>
+                        <h2 style="font-size: 18px; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Öğrenci Detayları</h2>
+                        <table style="width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px;">
+                            <thead>
+                                <tr style="background-color: #f2f2f2;">
+                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Öğrenci Adı</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Artı</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Eksi</th>
+                                    <th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Net Puan</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                `;
+
+                students.forEach(student => {
+                    reportHtml += `
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${student.name}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${student.pluses.length}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${student.minuses.length}</td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">${student.pluses.length - student.minuses.length}</td>
+                        </tr>
+                    `;
+                });
+
+                reportHtml += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                const element = document.createElement('div');
+                element.innerHTML = reportHtml;
+                
+                const opt = {
+                    margin:       0.5,
+                    filename:     `${appData.activeClass}-ogrenci-raporu.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().from(element).set(opt).save();
             });
 
             // Başlangıç
